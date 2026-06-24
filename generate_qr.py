@@ -13,7 +13,7 @@ OUT_FILE = BASE / "assets" / "mobile_qr.png"
 def read_url() -> str:
     if not URL_FILE.exists():
         raise SystemExit(f"URL file not found: {URL_FILE}")
-    url = URL_FILE.read_text(encoding="utf-8").strip()
+    url = URL_FILE.read_text(encoding="utf-8-sig").strip()
     if not url.startswith(("https://", "http://")) or "YOUR_" in url:
         raise SystemExit("mobile-url.txt must contain the final deployed URL.")
     return url
