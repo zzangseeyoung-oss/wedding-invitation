@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="장시영 · 이근영 결혼식에 초대합니다." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="장시영 · 이근영 결혼식에 초대합니다" />
+    <meta property="og:description" content="2026년 10월 10일 토요일 오후 12시 30분, 용인 코티지 보타닉 하우스" />
+    <meta property="og:image" content="assets/cottage.png" />
+    <title>장시영 · 이근영 결혼식에 초대합니다</title>
+    <link rel="preload" href="assets/cottage.webp" as="image" type="image/webp" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="invitation">
+      <section class="hero" aria-labelledby="couple-names">
+        <div class="frame-mark" aria-hidden="true"></div>
+        <p class="eyebrow">Wedding Invitation</p>
+        <h1 id="couple-names">장시영 · 이근영</h1>
+        <p class="roman">Jang See Young · Lee Geun Young</p>
+        <div class="ornament" aria-hidden="true"><span></span><i></i><span></span></div>
+        <p class="date-line">2026.10.10 SAT 12:30</p>
+        <p class="place-line">Cottage Botanic House</p>
+        <picture>
+          <source srcset="assets/cottage.webp" type="image/webp" />
+          <img class="hero-art" src="assets/cottage.png" alt="코티지 보타닉 하우스 일러스트" fetchpriority="high" />
+        </picture>
+      </section>
+
+      <section class="message section">
+        <img class="side-flower" src="assets/side_flowers.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <p class="section-title">작고 따뜻한 가족 예식</p>
+        <div class="message-text">
+          <p>우연히 시작된 대화가<br />서로의 하루를 응원하는 마음이 되었고,</p>
+          <p>그 마음이 천천히 쌓여<br />오늘의 약속이 되었습니다.</p>
+          <p>소중한 가족과 가까운 분들을 모시고<br />작은 결혼식을 올립니다.</p>
+          <p>편안하고 따뜻한 마음으로<br />함께해 주시면 감사하겠습니다.</p>
+        </div>
+        <div class="parents">
+          <p><strong>박경숙</strong><span>의 아들</span><strong>장시영</strong></p>
+          <p><strong>이영춘</strong><span>의 딸</span><strong>이근영</strong></p>
+        </div>
+      </section>
+
+      <section class="details section" aria-labelledby="details-title">
+        <p id="details-title" class="section-title">Wedding Day</p>
+        <dl class="detail-list">
+          <div>
+            <dt>일시</dt>
+            <dd>2026년 10월 10일 토요일<br /><span>오후 12시 30분</span></dd>
+          </div>
+          <div>
+            <dt>장소</dt>
+            <dd>용인 코티지 보타닉 하우스<br /><span>Cottage Botanic House</span></dd>
+          </div>
+          <div>
+            <dt>주소</dt>
+            <dd>경기 용인시 처인구 신송로55번길 10 1F</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="location section" aria-labelledby="location-title">
+        <p id="location-title" class="section-title">오시는 길</p>
+        <p class="address">경기 용인시 처인구 신송로55번길 10 1F</p>
+        <figure class="map-wrap">
+          <picture>
+            <source srcset="assets/map.webp" type="image/webp" />
+            <img src="assets/map.png" alt="용인 코티지 보타닉 하우스 약도" loading="lazy" decoding="async" />
+          </picture>
+        </figure>
+        <div class="actions">
+          <a href="https://map.naver.com/p/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">네이버지도</a>
+          <a href="https://map.kakao.com/link/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">카카오맵</a>
+          <button type="button" data-copy="경기 용인시 처인구 신송로55번길 10 1F">주소 복사</button>
+        </div>
+        <ul class="transport">
+          <li><strong>자가용</strong><span>내비게이션에 ‘용인 코티지 보타닉 하우스’ 검색</span></li>
+          <li><strong>주차</strong><span>주차 가능 / 현장 안내에 따라 이용</span></li>
+          <li><strong>버스</strong><span>용인공용버스터미널 하차 후 택시 이용 권장</span></li>
+          <li><strong>기차</strong><span>KTX 수원역 / SRT 동탄역 하차 후 택시 이용 권장</span></li>
+        </ul>
+      </section>
+
+      <footer class="closing">
+        <img src="assets/bouquet.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <p>소중한 날, 따뜻한 마음으로 기다리겠습니다.</p>
+      </footer>
+    </main>
+    <div class="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
