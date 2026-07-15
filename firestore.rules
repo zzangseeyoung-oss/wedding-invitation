@@ -1,0 +1,39 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /guestbook/{docId} {
+      allow read: if true;
+
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'name', 'message', 'pw', 'salt', 'image', 'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 1
+        && request.resource.data.name.size() <= 20
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.pw is string
+        && request.resource.data.pw.size() == 64
+        && request.resource.data.salt is string
+        && request.resource.data.salt.size() == 32
+        && (
+          request.resource.data.image == null
+          || (
+            request.resource.data.image is string
+            && request.resource.data.image.size() <= 1000000
+            && request.resource.data.image.matches('^data:image/jpeg;base64,.*')
+          )
+        )
+        && (
+          request.resource.data.message.size() > 0
+          || request.resource.data.image != null
+        )
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if false;
+      allow delete: if true;
+    }
+  }
+}

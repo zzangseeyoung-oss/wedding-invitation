@@ -2,7 +2,7 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" content="#f7f0df" />
     <meta name="description" content="장시영 · 이근영 결혼식에 초대합니다." />
     <meta property="og:type" content="website" />
@@ -169,7 +169,7 @@
         <div class="guestbook-shell">
           <div class="guestbook-letter">
             <span class="guestbook-flower" aria-hidden="true">✦</span>
-            <p>두 사람의 새로운 시작에<br />따뜻한 한마디를 더해 주세요.</p>
+            <p>두 사람의 새로운 시작에<br />따뜻한 한마디와 사진을 남겨 주세요.</p>
             <button
               type="button"
               class="guestbook-open"
@@ -180,11 +180,18 @@
               <span class="guestbook-open-mark" aria-hidden="true">◇</span>
               <span class="guestbook-open-label">축하 글 남기기</span>
             </button>
+            <p class="guestbook-mode-note" data-guestbook-mode hidden></p>
           </div>
 
-          <div class="guestbook-messages" data-guestbook-messages aria-live="polite">
+          <div class="guestbook-feed" data-guestbook-feed aria-live="polite">
             <p class="guestbook-status">축하의 마음을 불러오고 있습니다.</p>
           </div>
+
+          <nav class="guestbook-pager" data-guestbook-pager aria-label="방명록 페이지" hidden>
+            <button type="button" class="pager-btn" data-page-prev>이전</button>
+            <span class="guestbook-pageinfo" data-page-info aria-live="polite">1 / 1</span>
+            <button type="button" class="pager-btn" data-page-next>다음</button>
+          </nav>
         </div>
       </section>
 
@@ -211,16 +218,41 @@
           <span id="compose-title">축하 글 작성</span>
           <button type="button" data-guestbook-close aria-label="작성창 닫기">×</button>
         </div>
-        <p class="compose-note">두 사람에게 따뜻한 마음을 남겨주세요.</p>
-        <div class="guestbook-thread-wrap">
-          <div class="guestbook-thread" data-utterances-container></div>
-          <span class="guestbook-help-cover" aria-hidden="true">따뜻한 마음을 적어주세요</span>
-          <span class="guestbook-submit-cover" aria-hidden="true">축하 글 등록</span>
-        </div>
+        <form class="compose-form" data-guestbook-form novalidate>
+          <label class="field">
+            <span class="field-label">이름</span>
+            <input type="text" name="name" maxlength="20" autocomplete="name" placeholder="성함을 입력해주세요" required />
+          </label>
+          <label class="field">
+            <span class="field-label">비밀번호 <em>글 삭제 시 필요 · 4자 이상</em></span>
+            <input type="password" name="password" maxlength="128" autocomplete="off" placeholder="다른 곳에서 쓰지 않는 비밀번호" required />
+          </label>
+          <label class="field">
+            <span class="field-label">축하 글</span>
+            <textarea name="message" maxlength="500" rows="4" placeholder="두 사람에게 전하고 싶은 마음을 적어주세요."></textarea>
+          </label>
+          <div class="field">
+            <span class="field-label">사진 <em>선택</em></span>
+            <div class="photo-field">
+              <label class="photo-pick">
+                <input type="file" name="photo" accept="image/*" data-photo-input />
+                <span class="photo-pick-icon" aria-hidden="true">＋</span>
+                <span class="photo-pick-label">사진 선택</span>
+              </label>
+              <div class="photo-preview" data-photo-preview hidden>
+                <img alt="선택한 사진 미리보기" data-photo-preview-img />
+                <button type="button" class="photo-remove" data-photo-remove aria-label="사진 제거">×</button>
+              </div>
+            </div>
+          </div>
+          <p class="compose-error" data-compose-error hidden></p>
+          <button type="submit" class="compose-submit" data-compose-submit>축하 글 남기기</button>
+        </form>
       </div>
     </div>
 
     <div class="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
+    <script type="module" src="guestbook.js"></script>
   </body>
 </html>
