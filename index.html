@@ -2,102 +2,185 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f0df" />
     <meta name="description" content="장시영 · 이근영 결혼식에 초대합니다." />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="장시영 · 이근영 결혼식에 초대합니다" />
     <meta property="og:description" content="2026년 10월 10일 토요일 오후 12시 30분, 용인 코티지 보타닉 하우스" />
-    <meta property="og:image" content="assets/cottage.png" />
+    <meta property="og:image" content="assets/cover-scene.jpg" />
     <title>장시영 · 이근영 결혼식에 초대합니다</title>
-    <link rel="preload" href="assets/cottage.webp" as="image" type="image/webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400;500;600&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" href="assets/cover-scene.jpg" as="image" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="invitation">
       <section class="hero" aria-labelledby="couple-names">
-        <div class="frame-mark" aria-hidden="true"></div>
-        <img class="hero-flower hero-flower-top" src="assets/side_flowers.webp" alt="" aria-hidden="true" fetchpriority="high" />
-        <img class="hero-flower hero-flower-bottom" src="assets/bouquet.webp" alt="" aria-hidden="true" fetchpriority="high" />
-        <p class="eyebrow">Wedding Invitation</p>
-        <h1 id="couple-names">장시영 · 이근영</h1>
-        <p class="roman">Jang See Young · Lee Geun Young</p>
-        <div class="ornament" aria-hidden="true"><span></span><i></i><span></span></div>
-        <div class="hero-date">
-          <p>2026.10.10</p>
-          <span>SAT · 12:30</span>
-        </div>
-        <p class="place-line">Cottage Botanic House</p>
-        <picture>
-          <source srcset="assets/cottage.webp" type="image/webp" />
-          <img class="hero-art" src="assets/cottage.png" alt="코티지 보타닉 하우스 일러스트" fetchpriority="high" />
+        <picture class="hero-media">
+          <img src="assets/cover-scene.jpg" alt="가을 정원의 온실 앞에 나란히 선 신랑 신부 수채화" fetchpriority="high" />
         </picture>
-        <div class="scroll-mark" aria-hidden="true"></div>
+        <div class="hero-frame" aria-hidden="true"></div>
+
+        <header class="hero-heading">
+          <p class="english-title">Wedding Invitation</p>
+          <p class="roman-names">Jang Seeyoung &amp; Lee Geunyoung</p>
+        </header>
+
+        <div class="hero-details">
+          <h1 id="couple-names">장시영 <span>&amp;</span> 이근영</h1>
+          <div class="diamond-rule" aria-hidden="true"><i></i></div>
+          <p class="hero-date">2026. 10. 10. SAT · 12:30 PM</p>
+          <p class="hero-place">용인 코티지 보타닉 하우스</p>
+        </div>
       </section>
 
-      <section class="message section">
-        <img class="side-flower" src="assets/side_flowers.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <p class="section-title">작고 따뜻한 가족 예식</p>
+      <section class="paper-section invitation-copy" aria-labelledby="invitation-title">
+        <p class="section-kicker">Invitation</p>
+        <h2 id="invitation-title">모시는 글</h2>
+        <div class="short-rule" aria-hidden="true"></div>
         <div class="message-text">
-          <p>우연히 시작된 대화가<br />서로의 하루를 응원하는 마음이 되었고,</p>
-          <p>그 마음이 천천히 쌓여<br />오늘의 약속이 되었습니다.</p>
-          <p>소중한 가족과 가까운 분들을 모시고<br />작은 결혼식을 올립니다.</p>
-          <p>편안하고 따뜻한 마음으로<br />함께해 주시면 감사하겠습니다.</p>
+          <p>
+            우연히 시작된 대화가<br />
+            서로의 하루를 응원하는 마음이 되었고,<br />
+            그 마음이 천천히 쌓여<br />
+            오늘의 약속이 되었습니다.
+          </p>
+          <p>
+            소중한 가족과 가까운 분들을 모시고<br />
+            저희의 새로운 시작을 함께하려 합니다.
+          </p>
+          <p>
+            편안하고 따뜻한 마음으로<br />
+            함께해 주시면 감사하겠습니다.
+          </p>
         </div>
-        <div class="parents">
-          <p><strong>박경숙</strong><span>의 아들</span><strong>장시영</strong></p>
-          <p><strong>이영춘</strong><span>의 딸</span><strong>이근영</strong></p>
+        <div class="family-lines">
+          <p><strong>박경숙</strong><span>의 아들</span><b>장시영</b></p>
+          <p><strong>이영춘</strong><span>의 딸</span><b>이근영</b></p>
         </div>
       </section>
 
-      <section class="details section" aria-labelledby="details-title">
-        <p id="details-title" class="section-title">Wedding Day</p>
-        <p class="section-subtitle">작은 정원에서 조용히 나누는 약속</p>
-        <dl class="detail-list">
-          <div>
-            <dt>일시</dt>
-            <dd>2026년 10월 10일 토요일<br /><span>오후 12시 30분</span></dd>
+      <section class="date-section" aria-labelledby="date-title">
+        <figure class="moon-scene">
+          <img src="assets/moon-scene.jpg" alt="달빛 아래 정원에 나란히 앉은 신랑 신부 수채화" loading="lazy" decoding="async" />
+        </figure>
+        <div class="paper-section date-content">
+          <p class="section-kicker">Save the Date</p>
+          <h2 id="date-title">October 2026</h2>
+          <p class="countdown" data-countdown>Wedding Day</p>
+
+          <div class="calendar" aria-label="2026년 10월 달력, 10일 토요일 결혼식">
+            <div class="calendar-weekdays" aria-hidden="true">
+              <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+            </div>
+            <div class="calendar-days">
+              <span></span><span></span><span></span><span></span>
+              <span>1</span><span>2</span><span>3</span>
+              <span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><strong>10</strong>
+              <span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span>
+              <span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span>
+              <span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span>
+            </div>
           </div>
-          <div>
-            <dt>장소</dt>
-            <dd>용인 코티지 보타닉 하우스<br /><span>Cottage Botanic House</span></dd>
+
+          <div class="wedding-time">
+            <span>Wedding Day</span>
+            <strong>2026년 10월 10일 토요일</strong>
+            <b>오후 12시 30분</b>
           </div>
-          <div>
-            <dt>주소</dt>
-            <dd>경기 용인시 처인구 신송로55번길 10 1F</dd>
-          </div>
+        </div>
+      </section>
+
+      <section class="paper-section location" aria-labelledby="location-title">
+        <p class="section-kicker">Location</p>
+        <h2 id="location-title">오시는 길</h2>
+        <p class="venue">용인 코티지 보타닉 하우스</p>
+        <p class="address">경기 용인시 처인구 신송로55번길 10, 1층</p>
+
+        <a
+          class="map-link"
+          href="https://map.naver.com/p/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="네이버 지도에서 용인 코티지 보타닉 하우스 보기"
+        >
+          <img src="assets/paper-map.jpg" alt="용인 코티지 보타닉 하우스 약도" loading="lazy" decoding="async" />
+        </a>
+
+        <div class="map-actions">
+          <a href="https://map.naver.com/p/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">네이버 지도</a>
+          <a href="https://map.kakao.com/link/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">카카오맵</a>
+          <button type="button" data-copy="경기 용인시 처인구 신송로55번길 10, 1층">주소 복사</button>
+        </div>
+
+        <dl class="transport">
+          <div><dt>자가용</dt><dd>내비게이션에 ‘용인 코티지 보타닉 하우스’ 검색</dd></div>
+          <div><dt>주차</dt><dd>현장 주차 가능 / 안내에 따라 이용</dd></div>
+          <div><dt>버스</dt><dd>용인공용버스터미널 하차 후 택시 · 금계천안마을 정류장 도보</dd></div>
+          <div><dt>기차</dt><dd>KTX 수원역 / SRT 동탄역 하차 후 택시 이용</dd></div>
         </dl>
       </section>
 
-      <section class="location section" aria-labelledby="location-title">
-        <p id="location-title" class="section-title">오시는 길</p>
-        <p class="address">경기 용인시 처인구 신송로55번길 10 1F</p>
-        <figure class="map-wrap">
-          <picture>
-            <source srcset="assets/map.webp" type="image/webp" />
-            <img src="assets/map.png" alt="용인 코티지 보타닉 하우스 약도" loading="lazy" decoding="async" />
-          </picture>
-        </figure>
-        <div class="actions">
-          <a href="https://map.naver.com/p/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">네이버지도</a>
-          <a href="https://map.kakao.com/link/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">카카오맵</a>
-          <button type="button" data-copy="경기 용인시 처인구 신송로55번길 10 1F">주소 복사</button>
-          <button type="button" data-share>공유하기</button>
+      <section class="paper-section account-section" aria-labelledby="account-title">
+        <p class="section-kicker">For Your Heart</p>
+        <h2 id="account-title">마음 전하실 곳</h2>
+        <div class="account-list">
+          <details>
+            <summary>신랑측 계좌번호</summary>
+            <div class="account-row">
+              <p><strong>박경숙</strong><span>국민은행 81024-03-13362</span></p>
+              <button type="button" data-copy="국민은행 81024-03-13362 박경숙">복사</button>
+            </div>
+          </details>
+          <details>
+            <summary>신부측 계좌번호</summary>
+            <div class="account-row">
+              <p><strong>이영춘</strong><span>새마을금고 9003-2480-5031-5</span></p>
+              <button type="button" data-copy="새마을금고 9003-2480-5031-5 이영춘">복사</button>
+            </div>
+          </details>
+          <details>
+            <summary>신랑 · 신부 계좌번호</summary>
+            <div class="account-row">
+              <p><strong>장시영</strong><span>토스뱅크 1002-5327-8726</span></p>
+              <button type="button" data-copy="토스뱅크 1002-5327-8726 장시영">복사</button>
+            </div>
+          </details>
         </div>
-        <ul class="transport">
-          <li><strong>자가용</strong><span>내비게이션에 ‘용인 코티지 보타닉 하우스’ 검색</span></li>
-          <li><strong>주차</strong><span>주차 가능 / 현장 안내에 따라 이용</span></li>
-          <li><strong>버스</strong><span>용인공용버스터미널 하차 후 택시 이용 권장</span></li>
-          <li><strong>기차</strong><span>KTX 수원역 / SRT 동탄역 하차 후 택시 이용 권장</span></li>
-        </ul>
+      </section>
+
+      <section class="paper-section guestbook" aria-labelledby="guestbook-title">
+        <p class="section-kicker">Guestbook</p>
+        <h2 id="guestbook-title">축하의 마음</h2>
+        <p class="guestbook-copy">두 사람에게 따뜻한 한마디를 남겨주세요.</p>
+        <div class="guestbook-thread">
+          <script
+            src="https://utteranc.es/client.js"
+            repo="zzangseeyoung-oss/wedding-invitation"
+            issue-term="pathname"
+            label="guestbook"
+            theme="github-light"
+            lang="ko"
+            crossorigin="anonymous"
+            async
+          ></script>
+        </div>
       </section>
 
       <footer class="closing">
-        <img src="assets/bouquet.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <p class="closing-names">JANG SEE YOUNG · LEE GEUN YOUNG</p>
+        <p class="closing-mark" aria-hidden="true">◆</p>
+        <p class="closing-names">Jang Seeyoung &amp; Lee Geunyoung</p>
         <p>소중한 날, 따뜻한 마음으로 기다리겠습니다.</p>
+        <button type="button" class="share-button" data-share>청첩장 공유하기</button>
       </footer>
     </main>
+
     <div class="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
   </body>
