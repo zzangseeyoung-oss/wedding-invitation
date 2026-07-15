@@ -128,28 +128,35 @@
       </section>
 
       <section class="paper-section account-section" aria-labelledby="account-title">
-        <p class="section-kicker">For Your Heart</p>
+        <p class="section-kicker">With Gratitude</p>
         <h2 id="account-title">마음 전하실 곳</h2>
+        <p class="account-intro">멀리서도 마음을 전해주시는 분들을 위해<br />양가 부모님과 두 사람의 계좌를 안내드립니다.</p>
         <div class="account-list">
           <details>
-            <summary>신랑측 계좌번호</summary>
+            <summary>
+              <span><small>신랑 어머니</small><strong>박경숙</strong></span>
+            </summary>
             <div class="account-row">
-              <p><strong>박경숙</strong><span>국민은행 81024-03-13362</span></p>
-              <button type="button" data-copy="국민은행 81024-03-13362 박경숙">복사</button>
+              <p><span>국민은행</span><strong>81024-03-13362</strong><small>예금주 박경숙</small></p>
+              <button type="button" data-copy="국민은행 81024-03-13362 박경숙">계좌 복사</button>
             </div>
           </details>
           <details>
-            <summary>신부측 계좌번호</summary>
+            <summary>
+              <span><small>신부 아버지</small><strong>이영춘</strong></span>
+            </summary>
             <div class="account-row">
-              <p><strong>이영춘</strong><span>새마을금고 9003-2480-5031-5</span></p>
-              <button type="button" data-copy="새마을금고 9003-2480-5031-5 이영춘">복사</button>
+              <p><span>새마을금고</span><strong>9003-2480-5031-5</strong><small>예금주 이영춘</small></p>
+              <button type="button" data-copy="새마을금고 9003-2480-5031-5 이영춘">계좌 복사</button>
             </div>
           </details>
           <details>
-            <summary>신랑 · 신부 계좌번호</summary>
+            <summary>
+              <span><small>신랑 · 신부 공동</small><strong>장시영 · 이근영</strong></span>
+            </summary>
             <div class="account-row">
-              <p><strong>장시영</strong><span>토스뱅크 1002-5327-8726</span></p>
-              <button type="button" data-copy="토스뱅크 1002-5327-8726 장시영">복사</button>
+              <p><span>토스뱅크 모임통장</span><strong>1002-5327-8726</strong><small>예금주 장시영</small></p>
+              <button type="button" data-copy="토스뱅크 1002-5327-8726 장시영">계좌 복사</button>
             </div>
           </details>
         </div>
@@ -158,18 +165,25 @@
       <section class="paper-section guestbook" aria-labelledby="guestbook-title">
         <p class="section-kicker">Guestbook</p>
         <h2 id="guestbook-title">축하의 마음</h2>
-        <p class="guestbook-copy">두 사람에게 따뜻한 한마디를 남겨주세요.</p>
-        <div class="guestbook-thread">
-          <script
-            src="https://utteranc.es/client.js"
-            repo="zzangseeyoung-oss/wedding-invitation"
-            issue-term="pathname"
-            label="guestbook"
-            theme="github-light"
-            lang="ko"
-            crossorigin="anonymous"
-            async
-          ></script>
+        <div class="guestbook-shell">
+          <div class="guestbook-letter">
+            <span class="guestbook-flower" aria-hidden="true">✦</span>
+            <p>두 사람의 새로운 시작에<br />따뜻한 한마디를 더해 주세요.</p>
+            <button
+              type="button"
+              class="guestbook-open"
+              data-guestbook-toggle
+              aria-controls="guestbook-compose"
+              aria-expanded="false"
+            >
+              <span class="guestbook-open-mark" aria-hidden="true">◇</span>
+              <span class="guestbook-open-label">축하 글 남기기</span>
+            </button>
+          </div>
+
+          <div class="guestbook-messages" data-guestbook-messages aria-live="polite">
+            <p class="guestbook-status">축하의 마음을 불러오고 있습니다.</p>
+          </div>
         </div>
       </section>
 
@@ -180,6 +194,30 @@
         <button type="button" class="share-button" data-share>청첩장 공유하기</button>
       </footer>
     </main>
+
+    <div
+      class="guestbook-compose"
+      id="guestbook-compose"
+      data-guestbook-compose
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="compose-title"
+      hidden
+    >
+      <button class="compose-backdrop" type="button" data-guestbook-close aria-label="작성창 닫기"></button>
+      <div class="guestbook-compose-panel">
+        <div class="compose-heading">
+          <span id="compose-title">축하 글 작성</span>
+          <button type="button" data-guestbook-close aria-label="작성창 닫기">×</button>
+        </div>
+        <p class="compose-note">두 사람에게 따뜻한 마음을 남겨주세요.</p>
+        <div class="guestbook-thread-wrap">
+          <div class="guestbook-thread" data-utterances-container></div>
+          <span class="guestbook-help-cover" aria-hidden="true">따뜻한 마음을 적어주세요</span>
+          <span class="guestbook-submit-cover" aria-hidden="true">축하 글 등록</span>
+        </div>
+      </div>
+    </div>
 
     <div class="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
