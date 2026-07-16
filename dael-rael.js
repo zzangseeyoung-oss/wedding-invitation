@@ -9,7 +9,7 @@
 
 // 배포 후 Cloud Run URL을 주입한다. 예: "https://<service>-<hash>.run.app/api/chat"
 // 빈 문자열이면 백엔드 없이 정적 안내 모드로 동작한다.
-const CHAT_ENDPOINT = "";
+const CHAT_ENDPOINT = "https://princess-recommend-radiation-clay.trycloudflare.com/api/chat";
 
 const STORAGE_KEY = "wedding_dael_rael_chat_v1";
 const STORAGE_VERSION = 1;
