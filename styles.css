@@ -1784,6 +1784,26 @@ body.dael-rael-open {
   color: var(--ink);
 }
 
+/* 입력 검증 안내(구두점만 입력 등) — §8 */
+.story-input-hint {
+  flex: 0 0 auto;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0 15px;
+  color: #8a7a4a;
+  font: 500 0.8rem/1.5 var(--sans);
+  transition: opacity 160ms ease, max-height 160ms ease;
+  position: relative;
+  z-index: 1;
+}
+
+.story-input-hint.show {
+  max-height: 32px;
+  opacity: 1;
+  padding: 2px 2px 5px;
+}
+
 .story-ai-input {
   flex: 0 0 auto;
   display: flex;

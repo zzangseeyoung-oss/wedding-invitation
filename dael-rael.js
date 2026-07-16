@@ -19,18 +19,18 @@ const HISTORY_SEND = 16; // 서버로 보낼 최근 메시지 수(질문·답변
 const REQUEST_TIMEOUT = 20000;
 
 const WELCOME =
-  "안녕하세요, 저는 다엘이에요.\n시영과 근영이 함께 그려 본 미래에서 인사드려요.\n아직 아껴 둔 이야기는 그대로 두고, 지금 들려드릴 수 있는 이야기와 결혼식 안내를 도와드릴게요.";
+  "안녕하세요, 다엘이에요.\n시영과 근영이 함께 꿈꾸는 미래에서 왔어요.\n두 사람이나 결혼식에 대해 궁금한 걸 편하게 물어보세요.";
 
 // 정적 엠블럼(다엘 인장 SVG: 딥그린 초승달 + 골드 별·외곽선, 아이보리 바탕). 정적 상수이므로 삽입 안전.
 const SPRIG_SVG =
   '<svg class="story-sprig" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.4" fill="#fbf7ec" stroke="#c1a24a" stroke-width="1"/><circle cx="20" cy="20" r="15" fill="none" stroke="#2f5d3a" stroke-width="0.7" opacity="0.45"/><path d="M22 11a9.5 9.5 0 1 0 0 18 7.6 7.6 0 0 1 0-18z" fill="#2f5d3a"/><path d="M26.3 11.4l.55 1.45 1.45.55-1.45.55-.55 1.45-.55-1.45-1.45-.55 1.45-.55z" fill="#c1a24a"/></svg>';
 
 const INITIAL_SUGGESTIONS = [
+  "시영은 무슨 일을 해요?",
+  "근영은 무슨 일을 해요?",
+  "두 사람은 몇 살이에요?",
   "엄마 아빠는 어떻게 만났어요?",
-  "처음부터 서로 좋아했나요?",
   "엄마는 아빠의 어떤 점이 좋아요?",
-  "아빠는 엄마의 어떤 점이 좋아요?",
-  "가족들은 언제부터 알고 있었나요?",
   "결혼식은 언제예요?",
   "주차는 가능한가요?",
 ];
@@ -38,7 +38,16 @@ const INITIAL_SUGGESTIONS = [
 /* ---------- 정적 FAQ (fallback / 백엔드 장애 시) ---------- */
 const A = {
   identity:
-    "저는 다엘이에요. 시영과 근영이 함께 그려 본 미래의 아이랍니다.\n두 사람의 공개된 이야기와 결혼식 안내를 대신 전해 드리고 있어요.",
+    "저는 시영과 근영이 함께 꿈꾸는 미래를 담아 만든 이야기 속 아이, 다엘이에요.\n두 사람의 이야기와 결혼식 안내를 전해 드리고 있어요.",
+  dael_birth:
+    "저는 아직 태어난 아이가 아니라, 시영과 근영이 함께 꿈꾸는 미래를 담아 만든 이야기 속 아이예요.",
+  seeyoung_profession:
+    "시영은 데이터사이언티스트예요.\n데이터를 분석해 시장과 사람의 움직임을 이해하고, 더 나은 의사결정을 돕는 일을 하고 있어요.",
+  geunyoung_profession:
+    "근영은 피트니스 센터 운영 컨설턴트예요.\n센터가 안정적이고 효율적으로 운영될 수 있도록 운영 방향과 개선 방안을 함께 고민하는 일을 해요.",
+  seeyoung_age: "시영은 1988년생이고, 결혼식 날에는 만 37세예요.",
+  geunyoung_age: "근영은 1992년생이고, 결혼식 날에는 만 34세예요.",
+  age: "시영은 1988년생, 근영은 1992년생이라 출생연도 기준 네 살 차이예요.\n결혼식 날에는 각각 만 37세와 만 34세예요.",
   meeting:
     "두 사람은 2025년 초, 온라인에서 나눈 짧은 대화로 처음 인연이 닿았어요.\n공통된 관심사로 이야기를 시작해, 만남을 이어 가며 조금씩 가까워졌습니다.",
   first_sight:
@@ -96,6 +105,21 @@ function matchFaq(text) {
   if (has(n, "주차")) return { answer: A.parking, action: "location_section", source: "wedding_information" };
   if (has(n, "결혼식", "예식", "웨딩", "몇시", "언제해", "언제결혼", "언제예요", "며칠", "날짜", "식장", "오시는길", "어디서해", "장소", "위치", "어떻게가", "가는길", "교통"))
     return { answer: A.wedding, action: "location_section", source: "wedding_information" };
+
+  // 직업 / 나이 (공개) + 다엘 출생
+  const see = has(n, "시영", "아빠", "신랑");
+  const geun = has(n, "근영", "엄마", "신부");
+  if (has(n, "직업", "무슨일", "하는일", "일해", "일하", "피트니스", "휘트니스", "헬스", "트레이너", "컨설턴트", "센터운영", "데이터사이언", "무슨분야", "어떤분야", "전문분야")) {
+    if (geun && !see) return { answer: A.geunyoung_profession, source: "public_summary" };
+    return { answer: A.seeyoung_profession, source: "public_summary" };
+  }
+  if (has(n, "몇살", "나이", "연세", "몇년생", "나이차")) {
+    if (has(n, "너", "넌", "다엘") && !see && !geun) return { answer: A.dael_birth, source: "public_summary" };
+    if (see && !geun) return { answer: A.seeyoung_age, source: "public_summary" };
+    if (geun && !see) return { answer: A.geunyoung_age, source: "public_summary" };
+    return { answer: A.age, source: "public_summary" };
+  }
+  if (has(n, "언제태어", "언제나와", "태어나")) return { answer: A.dael_birth, source: "public_summary" };
 
   // 정체
   if (has(n, "다엘", "라엘", "너희는누구", "누구세요", "누구야", "정체")) return { answer: A.identity, source: "public_summary" };
@@ -415,9 +439,45 @@ function reachedLimit() {
   return turnCount >= MAX_TURNS;
 }
 
+/* ---------- 입력 검증(§8) ---------- */
+let lastSent = { text: "", at: 0 };
+let inputHintEl = null;
+let inputHintTimer = 0;
+function meaningfulInput(text) {
+  // 구두점·기호·공백을 뺀 실제 내용이 있으면 의미 있는 입력('왜?','근영이는?' 등 허용)
+  return text.replace(/[\s\p{P}\p{S}]/gu, "").length > 0;
+}
+function showInputHint(msg) {
+  if (!formEl || !formEl.parentNode) return;
+  if (!inputHintEl) {
+    inputHintEl = document.createElement("div");
+    inputHintEl.className = "story-input-hint";
+    inputHintEl.setAttribute("role", "status");
+    formEl.parentNode.insertBefore(inputHintEl, formEl);
+  }
+  inputHintEl.textContent = msg;
+  inputHintEl.classList.add("show");
+  window.clearTimeout(inputHintTimer);
+  inputHintTimer = window.setTimeout(() => inputHintEl && inputHintEl.classList.remove("show"), 2200);
+}
+
 async function send(rawText) {
   const text = (rawText || "").trim();
-  if (!text || sending) return;
+  if (sending) return;
+  if (!text) return; // 빈 입력: 조용히 무시(말풍선 없음)
+  if (!meaningfulInput(text)) {
+    // 구두점·기호만 → 말풍선 만들지 않고 안내만
+    showInputHint("조금만 더 자세히 적어주세요.");
+    if (textarea) {
+      textarea.value = "";
+      resizeTextarea();
+    }
+    return;
+  }
+  const now = Date.now();
+  if (text === lastSent.text && now - lastSent.at < 1000) return; // 1초 내 동일 메시지 중복 방지
+  lastSent = { text, at: now };
+
   if (reachedLimit()) {
     clearSuggestions();
     renderMessage("assistant", "오늘 나눌 수 있는 이야기를 모두 나눴어요.\n‘새 이야기’로 다시 시작할 수 있어요.");
@@ -439,41 +499,51 @@ async function send(rawText) {
 
   setSending(true);
   showTyping();
+
+  // 한 요청의 결과를 정확히 한 번만 커밋한다(§6).
+  //   aborted → 조용히 폐기(말풍선 없음), failed → 오류 말풍선 1개, res → 성공 답변 1개.
+  let res = null;
+  let aborted = false;
+  let failed = false;
   try {
-    let res;
     if (CHAT_ENDPOINT) {
       res = await callBackend(text);
-      if (gen !== sendGen) return; // '새 이야기' 등으로 무효화되면 폐기
       if (!res.answer) throw new Error("empty");
     } else {
-      await new Promise((r) => setTimeout(r, 420)); // 정적 모드에서도 타이핑이 잠깐 보이도록
-      if (gen !== sendGen) return;
+      await new Promise((r) => setTimeout(r, 380));
       const fb = matchFaq(text);
       res = fb
         ? { answer: fb.answer, action: fb.action || "none", suggestions: [] }
-        : { answer: A.guide, action: "none", suggestions: INITIAL_SUGGESTIONS.slice(0, 4) };
+        : { answer: A.guide, action: "none", suggestions: INITIAL_SUGGESTIONS.slice(0, 3) };
     }
-    hideTyping();
-    memorySummary = res.memory_summary !== undefined ? res.memory_summary : memorySummary;
-    addAssistant(res.answer, { suggestions: res.suggestions, action: res.action });
-  } catch {
-    if (gen !== sendGen) return;
-    hideTyping();
-    const fb = matchFaq(text);
-    if (fb) {
-      addAssistant(fb.answer, { action: fb.action });
+  } catch (e) {
+    if (e && e.name === "AbortError") aborted = true; // 새 이야기/중복 전송으로 중단 → 오류 아님
+    else failed = true;
+  }
+
+  // 이 응답이 낡았으면(다른 전송/새 이야기 시작) 성공·실패 어느 것도 커밋하지 않는다.
+  if (gen !== sendGen) return;
+
+  hideTyping(); // 정확히 한 번 제거
+  if (aborted) {
+    setSending(false);
+    return; // 오류 말풍선 없음
+  }
+
+  try {
+    if (!failed && res && res.answer) {
+      memorySummary = res.memory_summary !== undefined ? res.memory_summary : memorySummary;
+      addAssistant(res.answer, { suggestions: res.suggestions, action: res.action }); // 최종 답변 1개
     } else {
-      addAssistant(
-        "지금은 다엘이 잠깐 대답하기 어려워요.\n조금 뒤에 다시 찾아와 주세요.",
-        { suggestions: INITIAL_SUGGESTIONS.slice(0, 3) },
-      );
+      // terminal error → 오류 말풍선 1개(성공 뒤에 추가되지 않음)
+      const fb = matchFaq(text);
+      if (fb) addAssistant(fb.answer, { action: fb.action });
+      else addAssistant("지금은 다엘이 잠깐 대답하기 어려워요.\n조금 뒤에 다시 찾아와 주세요.", { suggestions: INITIAL_SUGGESTIONS.slice(0, 3) });
     }
   } finally {
-    if (gen === sendGen) {
-      setSending(false);
-      persist();
-      if (reachedLimit()) renderSuggestions(null);
-    }
+    setSending(false); // addAssistant 렌더 오류가 나도 입력은 반드시 복구
+    persist();
+    if (reachedLimit()) renderSuggestions(null);
   }
 }
 
