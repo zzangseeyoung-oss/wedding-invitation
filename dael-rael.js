@@ -21,10 +21,9 @@ const REQUEST_TIMEOUT = 20000;
 const WELCOME =
   "안녕하세요, 저는 다엘이에요.\n시영과 근영이 함께 그려 본 미래에서 인사드려요.\n아직 아껴 둔 이야기는 그대로 두고, 지금 들려드릴 수 있는 이야기와 결혼식 안내를 도와드릴게요.";
 
-// 정적 엠블럼(다엘 편지 메달리온 SVG). 사용자 입력이 아니므로 삽입 안전.
-// 골드 외링 + 크림 원판 위 조용한 아기 얼굴(볼홍조·미소) + 미래에서 온 표식(반짝임).
+// 정적 엠블럼(다엘 인장 SVG: 딥그린 초승달 + 골드 별·외곽선, 아이보리 바탕). 정적 상수이므로 삽입 안전.
 const SPRIG_SVG =
-  '<svg class="story-sprig" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.2" fill="none" stroke="#c1a24a" stroke-width="0.9"/><circle cx="20" cy="20" r="14.5" fill="#fffaf0" stroke="currentColor" stroke-width="1.3"/><path d="M13 17c2.2-3 11.8-3 14 0" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="16.6" cy="20.4" r="1.35" fill="currentColor"/><circle cx="23.4" cy="20.4" r="1.35" fill="currentColor"/><circle cx="13.9" cy="23.3" r="1.5" fill="#e6a6a6"/><circle cx="26.1" cy="23.3" r="1.5" fill="#e6a6a6"/><path d="M17 24.3c1.4 1.5 4.6 1.5 6 0" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/><path d="M31 9l.6 1.6 1.6.6-1.6.6L31 14l-.6-1.6-1.6-.6 1.6-.6z" fill="#c1a24a"/></svg>';
+  '<svg class="story-sprig" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.4" fill="#fbf7ec" stroke="#c1a24a" stroke-width="1"/><circle cx="20" cy="20" r="15" fill="none" stroke="#2f5d3a" stroke-width="0.7" opacity="0.45"/><path d="M22 11a9.5 9.5 0 1 0 0 18 7.6 7.6 0 0 1 0-18z" fill="#2f5d3a"/><path d="M26.3 11.4l.55 1.45 1.45.55-1.45.55-.55 1.45-.55-1.45-1.45-.55 1.45-.55z" fill="#c1a24a"/></svg>';
 
 const INITIAL_SUGGESTIONS = [
   "엄마 아빠는 어떻게 만났어요?",
@@ -201,59 +200,25 @@ function renderMessage(role, text, opts = {}) {
   const wrap = document.createElement("div");
   wrap.className = `story-msg story-msg-${role}`;
   if (role === "assistant" && !assistantLabeled) {
-    assistantLabeled = true; // 첫 어시스턴트 메시지에만 라벨(환영말 이중 라벨 방지)
+    assistantLabeled = true; // 첫 어시스턴트 메시지에만 라벨(그룹 시작에만 아바타)
     const label = document.createElement("span");
     label.className = "story-msg-label";
-    label.insertAdjacentHTML("beforeend", SPRIG_SVG); // 정적 엠블럼(안전)
-    label.append(document.createTextNode("다엘의 편지"));
+    label.insertAdjacentHTML("beforeend", SPRIG_SVG); // 정적 인장 SVG(안전)
+    label.append(document.createTextNode("다엘"));
     wrap.append(label);
   }
   const bubble = document.createElement("div");
   bubble.className = "story-bubble";
+  bubble.textContent = text; // HTML 삽입 금지: 모델/서버 문자열은 textContent 로만
+  if (opts.fade && !prefersReducedMotion()) bubble.classList.add("story-fade");
   wrap.append(bubble);
   messagesEl.append(wrap);
-  if (opts.type) {
-    typeText(bubble, text, opts.done); // 아기가 또박또박 말하듯 한 글자씩
-  } else {
-    bubble.textContent = text; // HTML 삽입 금지
+  if (opts.done) {
+    // 글자단위 타이핑 폐지: 문장 전체 fade-in 뒤(또는 즉시) 추천/이동칩 표시
+    if (opts.fade && !prefersReducedMotion()) window.setTimeout(opts.done, 180);
+    else opts.done();
   }
   return wrap;
-}
-
-/* 아기가 말하듯 타이핑 리빌 + 아바타 talking */
-function setAvatarTalking(on) {
-  const av = document.querySelector(".story-ai-avatar");
-  if (av) av.classList.toggle("talking", on);
-}
-function typeText(el, text, done) {
-  if (prefersReducedMotion() || !text) {
-    el.textContent = text || "";
-    setAvatarTalking(false);
-    if (done) done();
-    return;
-  }
-  setAvatarTalking(true);
-  const gen = sendGen;
-  const chars = [...text];
-  let i = 0;
-  const step = Math.max(10, Math.min(30, Math.round(1300 / chars.length)));
-  const timer = window.setInterval(() => {
-    if (gen !== sendGen) {
-      window.clearInterval(timer);
-      el.textContent = text;
-      setAvatarTalking(false);
-      return;
-    }
-    i += 1;
-    el.textContent = chars.slice(0, i).join("");
-    if (i % 3 === 0) autoScroll(false);
-    if (i >= chars.length) {
-      window.clearInterval(timer);
-      setAvatarTalking(false);
-      autoScroll(false);
-      if (done) done();
-    }
-  }, step);
 }
 
 let suggestionsEl = null;
@@ -263,19 +228,34 @@ function clearSuggestions() {
     suggestionsEl = null;
   }
 }
-function renderSuggestions(list) {
+function makeChip(q) {
+  const chip = document.createElement("button");
+  chip.type = "button";
+  chip.className = "story-chip";
+  chip.textContent = q;
+  chip.addEventListener("click", () => send(q));
+  return chip;
+}
+function renderSuggestions(list, opts = {}) {
   clearSuggestions();
   if (!list || !list.length) return;
+  const limit = opts.limit || list.length;
   const box = document.createElement("div");
   box.className = "story-suggestions";
-  list.slice(0, 5).forEach((q) => {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "story-chip";
-    chip.textContent = q;
-    chip.addEventListener("click", () => send(q));
-    box.append(chip);
-  });
+  const shown = list.slice(0, limit);
+  const rest = list.slice(limit);
+  shown.forEach((q) => box.append(makeChip(q)));
+  if (opts.more && rest.length) {
+    const more = document.createElement("button");
+    more.type = "button";
+    more.className = "story-chip story-chip-more";
+    more.textContent = "더 보기";
+    more.addEventListener("click", () => {
+      rest.forEach((q) => box.insertBefore(makeChip(q), more));
+      more.remove();
+    });
+    box.append(more);
+  }
   messagesEl.append(box);
   suggestionsEl = box;
 }
@@ -322,6 +302,14 @@ function autoScroll(force) {
     jumpBtn.hidden = false;
   }
 }
+function scrollToAnswerStart(wrap) {
+  if (!wrap) return;
+  // 답변 전체가 아니라 답변 '시작' 위치가 상단 근처에 오도록(긴 답변도 처음부터 읽힘)
+  const top = Math.max(0, wrap.offsetTop - 12);
+  const maxTop = Math.max(0, messagesEl.scrollHeight - messagesEl.clientHeight);
+  messagesEl.scrollTop = Math.min(top, maxTop);
+  jumpBtn.hidden = true;
+}
 messagesEl?.addEventListener("scroll", () => {
   if (isNearBottom()) jumpBtn.hidden = true;
 });
@@ -364,16 +352,20 @@ function appendNavChip(action) {
 
 /* ---------- 응답 처리 ---------- */
 function addAssistant(text, { suggestions, action } = {}) {
-  // 아기가 말하듯 타이핑으로 보여주고, 다 말한 뒤 추천/이동 칩을 띄운다.
+  const following = isNearBottom();
   messages.push({ role: "assistant", text });
-  renderMessage("assistant", text, {
-    type: true,
+  const wrap = renderMessage("assistant", text, {
+    fade: true,
     done: () => {
-      renderSuggestions(suggestions && suggestions.length ? suggestions : null);
+      // 답변 후 추천 질문은 최대 2개만
+      renderSuggestions(suggestions && suggestions.length ? suggestions : null, { limit: 2 });
       if (action) appendNavChip(action);
-      autoScroll(false);
+      if (following) scrollToAnswerStart(wrap);
     },
   });
+  // 답변 '시작' 위치를 보여준다. 사용자가 위를 보고 있으면 강제 이동하지 않고 점프 버튼만.
+  if (following) scrollToAnswerStart(wrap);
+  else jumpBtn.hidden = false;
 }
 
 /* ---------- 백엔드 호출 ---------- */
@@ -642,7 +634,7 @@ function doRestart() {
   clearSuggestions();
   setSending(false);
   renderMessage("assistant", WELCOME);
-  renderSuggestions(INITIAL_SUGGESTIONS);
+  renderSuggestions(INITIAL_SUGGESTIONS, { limit: 3, more: true });
   scrollToBottom();
   persist();
 }
@@ -661,7 +653,7 @@ function initConversation() {
     turnCount = typeof saved.turn_count === "number" ? saved.turn_count : messages.filter((m) => m.role === "user").length;
     messages.forEach((m) => renderMessage(m.role, m.text));
     if (messages[messages.length - 1].role === "assistant" && !reachedLimit()) {
-      renderSuggestions(INITIAL_SUGGESTIONS.slice(0, 3));
+      renderSuggestions(INITIAL_SUGGESTIONS, { limit: 3, more: true });
     }
   } else {
     sessionId = newId();
@@ -669,6 +661,6 @@ function initConversation() {
     memorySummary = "";
     turnCount = 0;
     renderMessage("assistant", WELCOME);
-    renderSuggestions(INITIAL_SUGGESTIONS);
+    renderSuggestions(INITIAL_SUGGESTIONS, { limit: 3, more: true });
   }
 }
