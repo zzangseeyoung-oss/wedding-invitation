@@ -19,11 +19,11 @@ const HISTORY_SEND = 16; // 서버로 보낼 최근 메시지 수(질문·답변
 const REQUEST_TIMEOUT = 20000;
 
 const WELCOME =
-  "안녕하세요, 다엘과 라엘이에요.\n시영과 근영이 함께 그려 본 미래에서 인사드려요.\n아직 아껴 둔 이야기는 그대로 두고, 지금 들려드릴 수 있는 이야기와 결혼식 안내를 도와드릴게요.";
+  "안녕하세요, 저는 다엘이에요.\n시영과 근영이 함께 그려 본 미래에서 인사드려요.\n아직 아껴 둔 이야기는 그대로 두고, 지금 들려드릴 수 있는 이야기와 결혼식 안내를 도와드릴게요.";
 
 // 정적 엠블럼(식물 SVG). 사용자 입력이 아니므로 삽입 안전.
 const SPRIG_SVG =
-  '<svg class="story-sprig" viewBox="0 0 40 40" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M20 35V13"/><path d="M20 19c-6-1-9-4-10-9"/><path d="M20 19c6-1 9-4 10-9"/><path d="M20 26c-5-1-8-3-9-7"/><path d="M20 26c5-1 8-3 9-7"/></g><circle cx="20" cy="8.5" r="2.2" fill="#cf9e3d"/></svg>';
+  '<svg class="story-sprig" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="22" r="11" fill="#fffaf0" stroke="currentColor" stroke-width="1.6"/><path d="M12.5 15c2-4 13-4 15 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="16" cy="21.5" r="1.5" fill="currentColor"/><circle cx="24" cy="21.5" r="1.5" fill="currentColor"/><circle cx="12.6" cy="25" r="1.7" fill="#e6a6a6"/><circle cx="27.4" cy="25" r="1.7" fill="#e6a6a6"/><path d="M17 25.5c1.5 1.8 4.5 1.8 6 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
 
 const INITIAL_SUGGESTIONS = [
   "엄마 아빠는 어떻게 만났어요?",
@@ -38,7 +38,7 @@ const INITIAL_SUGGESTIONS = [
 /* ---------- 정적 FAQ (fallback / 백엔드 장애 시) ---------- */
 const A = {
   identity:
-    "다엘과 라엘은 시영과 근영이 함께 그려 본 미래의 아이들이에요.\n두 사람의 공개된 이야기와 결혼식 안내를 대신 전해 드리는 역할을 맡고 있어요.",
+    "저는 다엘이에요. 시영과 근영이 함께 그려 본 미래의 아이랍니다.\n두 사람의 공개된 이야기와 결혼식 안내를 대신 전해 드리고 있어요.",
   meeting:
     "두 사람은 2025년 초, 온라인에서 나눈 짧은 대화로 처음 인연이 닿았어요.\n공통된 관심사로 이야기를 시작해, 만남을 이어 가며 조금씩 가까워졌습니다.",
   first_sight:
@@ -58,7 +58,7 @@ const A = {
   video_reserved:
     "그 이야기는 두 사람이 영상으로 직접 전하려고 아껴 둔 부분이에요.\n지금은 두 사람이 천천히 가까워졌다는 것까지만 전해 드릴게요.",
   hold_scene:
-    "그 장면은 두 사람의 이야기에서 특히 중요한 순간이라, 저희가 먼저 말씀드리지 않기로 했어요.\n나중에 공개될 영상에서 두 사람이 직접 들려드릴 거예요.",
+    "그 장면은 두 사람의 이야기에서 특히 중요한 순간이라, 제가 먼저 말씀드리지 않기로 했어요.\n나중에 공개될 영상에서 두 사람이 직접 들려드릴 거예요.",
   letter:
     "두 사람 사이에는 작은 선물과 마음을 전한 메시지가 있었어요.\n구체적인 내용은 두 사람만의 이야기로 남겨 두고 있습니다.",
   wedding:
@@ -196,7 +196,7 @@ const restartBtn = document.querySelector("[data-story-restart]");
 const jumpBtn = document.querySelector("[data-story-jump]");
 
 /* ---------- 렌더 ---------- */
-function renderMessage(role, text, { first } = {}) {
+function renderMessage(role, text, opts = {}) {
   const wrap = document.createElement("div");
   wrap.className = `story-msg story-msg-${role}`;
   if (role === "assistant" && !assistantLabeled) {
@@ -204,15 +204,55 @@ function renderMessage(role, text, { first } = {}) {
     const label = document.createElement("span");
     label.className = "story-msg-label";
     label.insertAdjacentHTML("beforeend", SPRIG_SVG); // 정적 엠블럼(안전)
-    label.append(document.createTextNode("다엘 & 라엘"));
+    label.append(document.createTextNode("다엘"));
     wrap.append(label);
   }
   const bubble = document.createElement("div");
   bubble.className = "story-bubble";
-  bubble.textContent = text; // HTML 삽입 금지
   wrap.append(bubble);
   messagesEl.append(wrap);
+  if (opts.type) {
+    typeText(bubble, text, opts.done); // 아기가 또박또박 말하듯 한 글자씩
+  } else {
+    bubble.textContent = text; // HTML 삽입 금지
+  }
   return wrap;
+}
+
+/* 아기가 말하듯 타이핑 리빌 + 아바타 talking */
+function setAvatarTalking(on) {
+  const av = document.querySelector(".story-ai-avatar");
+  if (av) av.classList.toggle("talking", on);
+}
+function typeText(el, text, done) {
+  if (prefersReducedMotion() || !text) {
+    el.textContent = text || "";
+    setAvatarTalking(false);
+    if (done) done();
+    return;
+  }
+  setAvatarTalking(true);
+  const gen = sendGen;
+  const chars = [...text];
+  let i = 0;
+  const step = Math.max(10, Math.min(30, Math.round(1300 / chars.length)));
+  const timer = window.setInterval(() => {
+    if (gen !== sendGen) {
+      window.clearInterval(timer);
+      el.textContent = text;
+      setAvatarTalking(false);
+      return;
+    }
+    i += 1;
+    el.textContent = chars.slice(0, i).join("");
+    if (i % 3 === 0) autoScroll(false);
+    if (i >= chars.length) {
+      window.clearInterval(timer);
+      setAvatarTalking(false);
+      autoScroll(false);
+      if (done) done();
+    }
+  }, step);
 }
 
 let suggestionsEl = null;
@@ -323,12 +363,16 @@ function appendNavChip(action) {
 
 /* ---------- 응답 처리 ---------- */
 function addAssistant(text, { suggestions, action } = {}) {
-  // 액션이 있어도 채팅을 닫지 않고, 답변을 남긴 뒤 이동 칩을 제공한다(답변을 읽을 수 있게).
-  renderMessage("assistant", text);
+  // 아기가 말하듯 타이핑으로 보여주고, 다 말한 뒤 추천/이동 칩을 띄운다.
   messages.push({ role: "assistant", text });
-  renderSuggestions(suggestions && suggestions.length ? suggestions : null);
-  if (action) appendNavChip(action);
-  autoScroll(false);
+  renderMessage("assistant", text, {
+    type: true,
+    done: () => {
+      renderSuggestions(suggestions && suggestions.length ? suggestions : null);
+      if (action) appendNavChip(action);
+      autoScroll(false);
+    },
+  });
 }
 
 /* ---------- 백엔드 호출 ---------- */
@@ -427,7 +471,7 @@ async function send(rawText) {
       addAssistant(fb.answer, { action: fb.action });
     } else {
       addAssistant(
-        "지금은 다엘과 라엘의 연결이 잠시 원활하지 않아요.\n조금 뒤에 다시 찾아와 주세요.",
+        "지금은 다엘이 잠깐 대답하기 어려워요.\n조금 뒤에 다시 찾아와 주세요.",
         { suggestions: INITIAL_SUGGESTIONS.slice(0, 3) },
       );
     }
@@ -558,7 +602,7 @@ function showRestartConfirm() {
   const box = document.createElement("div");
   box.className = "story-restart-confirm";
   const msg = document.createElement("p");
-  msg.textContent = "지금까지 나눈 이야기를 지우고 다엘과 라엘에게 새로 물어볼까요?";
+  msg.textContent = "지금까지 나눈 이야기를 지우고 다엘에게 새로 물어볼까요?";
   const row = document.createElement("div");
   row.className = "story-restart-actions";
   const yes = document.createElement("button");

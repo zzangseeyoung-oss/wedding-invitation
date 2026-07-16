@@ -1447,6 +1447,24 @@ body.dael-rael-open {
   height: 22px;
 }
 
+/* 다엘이 말하는 동안 아바타가 방긋방긋 */
+.story-ai-avatar.talking {
+  animation: dael-talk 0.6s ease-in-out infinite;
+}
+
+@keyframes dael-talk {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  35% {
+    transform: translateY(-2px) rotate(-5deg);
+  }
+  70% {
+    transform: translateY(-1px) rotate(4deg);
+  }
+}
+
 .story-ai-heading-wrap {
   flex: 1 1 auto;
   min-width: 0;
@@ -1868,7 +1886,8 @@ body.dael-rael-open {
   .story-ai-panel,
   .story-msg,
   .story-suggestions,
-  .story-ai-jump {
+  .story-ai-jump,
+  .story-ai-avatar.talking {
     animation: none;
   }
 
