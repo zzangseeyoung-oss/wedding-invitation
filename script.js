@@ -59,3 +59,52 @@ if (countdown) {
     countdown.textContent = "함께해 주셔서 감사합니다";
   }
 }
+
+/* ---------- 배경음악(자동재생 시도 + 반복 + 토글) ---------- */
+(function initBgm() {
+  const audio = document.getElementById("wedding-bgm");
+  const btn = document.querySelector("[data-bgm-toggle]");
+  if (!audio || !btn) return;
+  audio.volume = 0.5;
+  let userPaused = false;
+
+  function reflect() {
+    const on = !audio.paused;
+    btn.classList.toggle("playing", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  // 브라우저 자동재생 정책상 소리 있는 자동재생은 첫 사용자 상호작용이 필요할 수 있다.
+  audio.play().then(reflect).catch(() => {});
+
+  const kick = (e) => {
+    if (btn.contains(e.target)) return; // 토글 버튼 클릭은 자체 핸들러가 처리
+    if (userPaused) return;
+    audio.play().then(() => {
+      reflect();
+      if (!audio.paused) {
+        ["pointerdown", "touchstart", "keydown", "click", "scroll"].forEach((ev) =>
+          window.removeEventListener(ev, kick, true),
+        );
+      }
+    }).catch(() => {});
+  };
+  ["pointerdown", "touchstart", "keydown", "click", "scroll"].forEach((ev) =>
+    window.addEventListener(ev, kick, { capture: true, passive: true }),
+  );
+
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (audio.paused) {
+      userPaused = false;
+      audio.play().then(reflect).catch(() => {});
+    } else {
+      userPaused = true;
+      audio.pause();
+      reflect();
+    }
+  });
+  audio.addEventListener("play", reflect);
+  audio.addEventListener("pause", reflect);
+  reflect();
+})();

@@ -1784,6 +1784,42 @@ body.dael-rael-open {
   color: var(--ink);
 }
 
+/* 배경음악 토글 버튼 */
+.bgm-toggle {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+  z-index: 55;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(150, 132, 92, 0.35);
+  background: rgba(255, 253, 246, 0.82);
+  color: var(--green-dark);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 2px 8px rgba(60, 52, 30, 0.12);
+  cursor: pointer;
+  transition: background 140ms ease, transform 120ms ease, opacity 160ms ease;
+}
+.bgm-toggle:active {
+  transform: scale(0.94);
+}
+.bgm-toggle .bgm-slash {
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+.bgm-toggle.playing .bgm-slash {
+  opacity: 0;
+}
+body.dael-rael-open .bgm-toggle,
+body.guestbook-is-open .bgm-toggle {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* 입력 검증 안내(구두점만 입력 등) — §8 */
 .story-input-hint {
   flex: 0 0 auto;

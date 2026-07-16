@@ -21,6 +21,12 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <audio id="wedding-bgm" loop preload="auto" playsinline>
+      <source src="assets/bgm.mp3" type="audio/mpeg" />
+    </audio>
+    <button type="button" class="bgm-toggle" data-bgm-toggle aria-label="배경음악 재생 또는 일시정지" aria-pressed="false">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v11" /><circle cx="6" cy="18" r="2.6" /><circle cx="16" cy="15" r="2.6" /><line class="bgm-slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" /></svg>
+    </button>
     <main class="invitation">
       <section class="hero" aria-labelledby="couple-names">
         <picture class="hero-media">
@@ -68,13 +74,13 @@
       </section>
 
       <section class="paper-section story-ai-card" aria-labelledby="story-ai-title">
-        <p class="section-kicker">Ask Dael</p>
+        <p class="section-kicker">Our Story</p>
         <div class="story-ai-emblem" aria-hidden="true">
-          <svg class="story-sprig" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18.4" fill="#fbf7ec" stroke="#c1a24a" stroke-width="1"/><circle cx="20" cy="20" r="15" fill="none" stroke="#2f5d3a" stroke-width="0.7" opacity="0.45"/><path d="M22 11a9.5 9.5 0 1 0 0 18 7.6 7.6 0 0 1 0-18z" fill="#2f5d3a"/><path d="M26.3 11.4l.55 1.45 1.45.55-1.45.55-.55 1.45-.55-1.45-1.45-.55 1.45-.55z" fill="#c1a24a"/></svg>
+          <svg class="story-sprig" viewBox="0 0 40 40"><path d="M13 9 C 17 19, 18 26, 20 31.5" fill="none" stroke="#2f5d3a" stroke-width="2.2" stroke-linecap="round"/><path d="M27 9 C 23 19, 22 26, 20 31.5" fill="none" stroke="#c1a24a" stroke-width="2.2" stroke-linecap="round"/></svg>
         </div>
-        <h2 id="story-ai-title">다엘에게 물어보세요</h2>
-        <p class="story-ai-lead">다엘이 들려주는 엄마 아빠 이야기</p>
-        <p class="story-ai-desc">시영과 근영이 함께 그려 본 미래의 아이,<br />다엘이 두 사람의 이야기와<br />결혼식 안내를 들려드려요.</p>
+        <h2 id="story-ai-title">시영과 근영, 두 사람의 이야기</h2>
+        <p class="story-ai-lead">두 사람의 기록을 바탕으로 답해드려요</p>
+        <p class="story-ai-desc">어떻게 만났는지, 어떤 일을 하는지,<br />서로의 어떤 점을 좋아하는지<br />궁금한 걸 편하게 물어보세요.</p>
         <button
           type="button"
           class="story-ai-open"
@@ -83,10 +89,10 @@
           aria-expanded="false"
         >
           <span class="story-ai-open-mark" aria-hidden="true"><svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="#eacb83" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H8l-3 3v-3H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></span>
-          <span>다엘에게 물어보기</span>
+          <span>두 사람에 대해 물어보기</span>
         </button>
         <ul class="story-ai-hints" aria-hidden="true">
-          <li>엄마 아빠는 어떻게 만났어요?</li>
+          <li>두 사람은 어떻게 만났나요?</li>
           <li>서로의 어떤 점을 좋아하나요?</li>
           <li>결혼식은 언제예요?</li>
         </ul>
@@ -127,7 +133,7 @@
         <p class="section-kicker">Location</p>
         <h2 id="location-title">오시는 길</h2>
         <p class="venue">용인 코티지 보타닉 하우스</p>
-        <p class="address">경기 용인시 처인구 신송로55번길 10, 1층</p>
+        <p class="address">경기 용인시 처인구 신송로55번길 10</p>
 
         <a
           class="map-link"
@@ -142,7 +148,7 @@
         <div class="map-actions">
           <a href="https://map.naver.com/p/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">네이버 지도</a>
           <a href="https://map.kakao.com/link/search/%EC%9A%A9%EC%9D%B8%20%EC%BD%94%ED%8B%B0%EC%A7%80%20%EB%B3%B4%ED%83%80%EB%8B%89%20%ED%95%98%EC%9A%B0%EC%8A%A4" target="_blank" rel="noreferrer">카카오맵</a>
-          <button type="button" data-copy="경기 용인시 처인구 신송로55번길 10, 1층">주소 복사</button>
+          <button type="button" data-copy="경기 용인시 처인구 신송로55번길 10">주소 복사</button>
         </div>
 
         <dl class="transport">
@@ -286,16 +292,16 @@
       aria-describedby="story-ai-subtitle"
       hidden
     >
-      <button class="story-ai-backdrop" type="button" data-story-close aria-label="다엘 창 닫기"></button>
+      <button class="story-ai-backdrop" type="button" data-story-close aria-label="이야기 창 닫기"></button>
       <div class="story-ai-panel" tabindex="-1">
         <div class="story-ai-grabber" aria-hidden="true"></div>
         <header class="story-ai-header">
           <span class="story-ai-avatar" aria-hidden="true">
-            <svg class="story-sprig" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18.4" fill="#fbf7ec" stroke="#c1a24a" stroke-width="1"/><circle cx="20" cy="20" r="15" fill="none" stroke="#2f5d3a" stroke-width="0.7" opacity="0.45"/><path d="M22 11a9.5 9.5 0 1 0 0 18 7.6 7.6 0 0 1 0-18z" fill="#2f5d3a"/><path d="M26.3 11.4l.55 1.45 1.45.55-1.45.55-.55 1.45-.55-1.45-1.45-.55 1.45-.55z" fill="#c1a24a"/></svg>
+            <svg class="story-sprig" viewBox="0 0 40 40"><path d="M13 9 C 17 19, 18 26, 20 31.5" fill="none" stroke="#2f5d3a" stroke-width="2.2" stroke-linecap="round"/><path d="M27 9 C 23 19, 22 26, 20 31.5" fill="none" stroke="#c1a24a" stroke-width="2.2" stroke-linecap="round"/></svg>
           </span>
           <div class="story-ai-heading-wrap">
-            <span id="story-ai-heading" class="story-ai-heading">다엘</span>
-            <span id="story-ai-subtitle" class="story-ai-subtitle">시영과 근영이 함께 꿈꾸는 미래에서</span>
+            <span id="story-ai-heading" class="story-ai-heading">시영과 근영의 이야기</span>
+            <span id="story-ai-subtitle" class="story-ai-subtitle">두 사람의 기록을 바탕으로 답해드려요</span>
           </div>
           <div class="story-ai-header-actions">
             <button type="button" class="story-ai-restart" data-story-restart aria-label="새 이야기">
@@ -319,8 +325,8 @@
             data-story-textarea
             rows="1"
             maxlength="200"
-            placeholder="엄마 아빠나 결혼식에 대해 물어보세요"
-            aria-label="다엘에게 보낼 질문"
+            placeholder="두 사람이나 결혼식에 대해 물어보세요"
+            aria-label="두 사람의 이야기 안내에 보낼 질문"
           ></textarea>
           <button type="submit" class="story-ai-send" data-story-send aria-label="보내기">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 4 11 14"/><path d="M21 4 15 21 11 14 4 10Z"/></svg>
