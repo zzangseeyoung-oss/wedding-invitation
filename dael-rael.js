@@ -21,9 +21,10 @@ const REQUEST_TIMEOUT = 20000;
 const WELCOME =
   "안녕하세요, 저는 다엘이에요.\n시영과 근영이 함께 그려 본 미래에서 인사드려요.\n아직 아껴 둔 이야기는 그대로 두고, 지금 들려드릴 수 있는 이야기와 결혼식 안내를 도와드릴게요.";
 
-// 정적 엠블럼(식물 SVG). 사용자 입력이 아니므로 삽입 안전.
+// 정적 엠블럼(다엘 편지 메달리온 SVG). 사용자 입력이 아니므로 삽입 안전.
+// 골드 외링 + 크림 원판 위 조용한 아기 얼굴(볼홍조·미소) + 미래에서 온 표식(반짝임).
 const SPRIG_SVG =
-  '<svg class="story-sprig" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="22" r="11" fill="#fffaf0" stroke="currentColor" stroke-width="1.6"/><path d="M12.5 15c2-4 13-4 15 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="16" cy="21.5" r="1.5" fill="currentColor"/><circle cx="24" cy="21.5" r="1.5" fill="currentColor"/><circle cx="12.6" cy="25" r="1.7" fill="#e6a6a6"/><circle cx="27.4" cy="25" r="1.7" fill="#e6a6a6"/><path d="M17 25.5c1.5 1.8 4.5 1.8 6 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  '<svg class="story-sprig" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18.2" fill="none" stroke="#c1a24a" stroke-width="0.9"/><circle cx="20" cy="20" r="14.5" fill="#fffaf0" stroke="currentColor" stroke-width="1.3"/><path d="M13 17c2.2-3 11.8-3 14 0" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="16.6" cy="20.4" r="1.35" fill="currentColor"/><circle cx="23.4" cy="20.4" r="1.35" fill="currentColor"/><circle cx="13.9" cy="23.3" r="1.5" fill="#e6a6a6"/><circle cx="26.1" cy="23.3" r="1.5" fill="#e6a6a6"/><path d="M17 24.3c1.4 1.5 4.6 1.5 6 0" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round"/><path d="M31 9l.6 1.6 1.6.6-1.6.6L31 14l-.6-1.6-1.6-.6 1.6-.6z" fill="#c1a24a"/></svg>';
 
 const INITIAL_SUGGESTIONS = [
   "엄마 아빠는 어떻게 만났어요?",
@@ -204,7 +205,7 @@ function renderMessage(role, text, opts = {}) {
     const label = document.createElement("span");
     label.className = "story-msg-label";
     label.insertAdjacentHTML("beforeend", SPRIG_SVG); // 정적 엠블럼(안전)
-    label.append(document.createTextNode("다엘"));
+    label.append(document.createTextNode("다엘의 편지"));
     wrap.append(label);
   }
   const bubble = document.createElement("div");
