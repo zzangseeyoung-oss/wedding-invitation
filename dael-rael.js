@@ -7,9 +7,9 @@
  * - 영상용 상세 연애 본편은 이 파일 어디에도 넣지 않는다(백엔드 정책과 동일하게 fallback도 보류 답변).
  */
 
-// 배포 후 Cloud Run URL을 주입한다. 예: "https://<service>-<hash>.run.app/api/chat"
+// 로컬 GPU 백엔드 고정 주소(Tailscale Funnel — 재부팅에도 안 바뀜).
 // 빈 문자열이면 백엔드 없이 정적 안내 모드로 동작한다.
-const CHAT_ENDPOINT = "https://princess-recommend-radiation-clay.trycloudflare.com/api/chat";
+const CHAT_ENDPOINT = "https://seeyoungjang.tailb22995.ts.net/api/chat";
 
 const STORAGE_KEY = "wedding_dael_rael_chat_v1";
 const STORAGE_VERSION = 1;
