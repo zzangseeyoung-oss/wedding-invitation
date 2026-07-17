@@ -54,7 +54,7 @@
   pointer-events: none;
   will-change: opacity, transform;
 }
-.cine-intro.js-on .cine-scene:first-child {
+.cine-intro.js-on .cs-exterior {
   opacity: 1;
   visibility: visible;
 }
@@ -236,7 +236,7 @@
   .cine-intro.js-on { height: 100svh !important; min-height: 620px; }
   .cine-stage { position: relative; }
   .cine-intro.js-on .cine-scene { display: none; }
-  .cine-intro.js-on .cine-scene:first-child { display: grid; opacity: 1 !important; visibility: visible !important; }
+  .cine-intro.js-on .cs-exterior { display: grid; opacity: 1 !important; visibility: visible !important; }
   .cine-img { transform: none !important; filter: none !important; animation: none !important; }
   .cine-copy { opacity: 1 !important; transform: none !important; }
   .cine-cue span { animation: none; }
