@@ -1886,6 +1886,61 @@ body.rsvp-is-open {
   color: var(--text);
   font: 400 0.86rem/1.55 var(--sans);
 }
+.bus-nums {
+  font-weight: 600;
+  color: var(--green-dark);
+}
+.route-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 9px;
+}
+.route-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  margin-top: 9px;
+  padding: 0 15px;
+  border: 1px solid var(--green-dark);
+  border-radius: 18px;
+  background: var(--green-dark);
+  color: #fff;
+  font: 600 0.8rem/1 var(--sans);
+  text-decoration: none;
+  cursor: pointer;
+}
+.route-actions .route-btn {
+  margin-top: 0;
+}
+.route-btn.ghost {
+  background: #fff;
+  color: var(--green-dark);
+}
+.direction-alt {
+  margin-top: 4px;
+  padding: 10px 14px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: rgba(207, 158, 61, 0.05);
+}
+.direction-alt summary {
+  color: var(--green-dark);
+  font: 600 0.82rem/1.3 var(--sans);
+  cursor: pointer;
+}
+.direction-alt p {
+  margin: 8px 0 0;
+  color: var(--text);
+  font: 400 0.82rem/1.55 var(--sans);
+}
+.direction-note {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font: 400 0.78rem/1.5 var(--sans);
+  text-align: left;
+}
 
 /* ==================== RSVP 섹션 카드 ==================== */
 .rsvp-section {

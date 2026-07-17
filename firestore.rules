@@ -2,6 +2,14 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    // RSVP 관리자: 인증 + 이메일 인증됨 + 허용 목록에 포함된 계정만.
+    // (프런트 이메일 비교가 아니라 규칙에서 강제 → 우회 불가)
+    function isRsvpAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['zzangseeyoung@gmail.com'];
+    }
+
     match /guestbook/{docId} {
       allow read: if true;
 
@@ -39,7 +47,7 @@ service cloud.firestore {
     // 참석 의사 전달(RSVP): 이름·연락처 등 개인정보 수집 → 공개 조회/수정/삭제 전면 금지.
     // 생성만 허용하되 스키마·정합성(참석 시 인원>=1 && 이름수==인원, 불참 시 0/빈배열)을 강제.
     match /rsvp_submissions/{docId} {
-      allow read: if false;
+      allow read: if isRsvpAdmin();
       allow update: if false;
       allow delete: if false;
 

@@ -24,6 +24,12 @@ const CONFIG_READY =
   firebaseConfig.apiKey.length > 0 &&
   !firebaseConfig.apiKey.startsWith("YOUR_");
 
+// §13 운영 환경 판별: 오직 localhost/127.0.0.1(또는 명시적 ?rsvp_dev)에서만 preview(localStorage) 허용.
+// 운영(GitHub Pages 등)에서는 Firebase 실패 시 preview 폴백/가짜 성공 절대 금지 → 제출 불가.
+const IS_DEV =
+  ["localhost", "127.0.0.1"].includes(location.hostname) ||
+  new URLSearchParams(location.search).has("rsvp_dev");
+
 const toast = (message) => {
   if (typeof window.showToast === "function") window.showToast(message);
 };
@@ -51,6 +57,7 @@ async function makeFirebaseStore() {
   return {
     mode: "firebase",
     async add(payload) {
+      // 원장(연락처 포함) — 비공개(read:false). 신랑/신부만 인증 후 관리자 화면/콘솔에서 열람.
       await fs.addDoc(col, {
         ...payload,
         created_at: fs.serverTimestamp(),
@@ -255,8 +262,12 @@ function resetForm() {
 async function handleSubmit(event) {
   event.preventDefault();
   if (submitting) return;
-  if (!store) return showError("지금은 참석 의사를 전달할 수 없습니다. 잠시 후 다시 시도해 주세요.");
   clearError();
+  // §13: 운영에서는 Firebase가 준비돼야만 제출 가능(폴백/가짜성공 없음). 실패 시 재시도 안내.
+  const activeStore = await ensureStore();
+  if (!activeStore) {
+    return showError("현재 참석 의사를 전달할 수 없습니다.\n인터넷 연결을 확인한 뒤 다시 시도해 주세요.");
+  }
 
   const status = currentStatus();
   if (!status) return showError("참석 여부를 선택해 주세요.");
@@ -313,7 +324,7 @@ async function handleSubmit(event) {
   submitBtn.textContent = "전송 중입니다…";
 
   try {
-    await store.add(payload);
+    await activeStore.add(payload);
     showSuccess(status);
   } catch (err) {
     console.error(err);
@@ -381,18 +392,30 @@ document.addEventListener("click", (e) => {
   if (t && modal && !modal.hidden) setOpen(false);
 }, true);
 
+/* ---------- 저장소 확보 (§13: 운영은 Firebase만, 실패 시 폴백 없음) ---------- */
+async function ensureStore() {
+  if (store) return store;
+  if (CONFIG_READY) {
+    try {
+      store = await makeFirebaseStore();
+      return store;
+    } catch (err) {
+      console.error("firebase init failed", err);
+      store = null;
+    }
+  }
+  // preview(localStorage)는 개발 환경에서만. 운영에서는 절대 폴백하지 않는다.
+  if (!store && IS_DEV) store = makePreviewStore();
+  return store;
+}
+
 /* ---------- 초기화 ---------- */
 async function init() {
   if (!section || !toggleBtn) return;
-  try {
-    store = CONFIG_READY ? await makeFirebaseStore() : makePreviewStore();
-  } catch (err) {
-    console.error(err);
-    store = makePreviewStore();
-  }
-  if (store.mode === "preview" && modeNote) {
+  await ensureStore();
+  if (store && store.mode === "preview" && modeNote) {
     modeNote.hidden = false;
-    modeNote.textContent = "미리보기 모드 · 이 기기에만 저장됩니다 (실서비스 준비 중)";
+    modeNote.textContent = "미리보기 모드 · 이 기기에만 저장됩니다 (개발 환경 전용)";
   }
   applyStatus();
 }
