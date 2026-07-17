@@ -324,14 +324,15 @@ async function handleSubmit(event) {
   submitBtn.textContent = "전송 중입니다…";
 
   try {
-    await activeStore.add(payload);
+    // §13: 오프라인/차단 시 Firestore는 즉시 실패하지 않고 대기할 수 있으므로 타임아웃으로 실패 처리.
+    await withTimeout(activeStore.add(payload), SDK_TIMEOUT, "submit");
     showSuccess(status);
   } catch (err) {
     console.error(err);
     if (err.message === "PREVIEW_QUOTA") {
       showError("미리보기 저장 공간이 가득 찼습니다. (실서비스에서는 제한 없이 저장됩니다)");
     } else {
-      showError("전송 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      showError("현재 참석 의사를 전달할 수 없습니다.\n인터넷 연결을 확인한 뒤 다시 시도해 주세요.");
     }
   } finally {
     submitting = false;
