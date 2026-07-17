@@ -95,6 +95,10 @@
         .rc .rc-line { font-size: 0.85rem; margin: 2px 0; }
         .rc .rc-k { color: var(--muted); display: inline-block; min-width: 58px; }
       }
+      .del-btn { border: 1px solid #e3c9c9; background: #fff; color: var(--red); border-radius: 7px; padding: 5px 10px; font: 600 0.76rem/1 var(--sans); cursor: pointer; white-space: nowrap; }
+      .del-btn:hover { background: #fbeceb; }
+      .toast { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); background: #1f2430; color: #fff; padding: 10px 18px; border-radius: 9px; font-size: 0.85rem; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+      .toast.show { opacity: 1; }
     </style>
   </head>
   <body>
@@ -160,7 +164,7 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>제출 일시</th><th>참석</th><th>구분</th><th>대표자</th><th>연락처</th><th>인원</th><th>참석자 이름</th><th>전달사항</th><th>상태</th></tr></thead>
+          <thead><tr><th>제출 일시</th><th>참석</th><th>구분</th><th>대표자</th><th>연락처</th><th>인원</th><th>참석자 이름</th><th>전달사항</th><th>상태</th><th>관리</th></tr></thead>
           <tbody data-tbody></tbody>
         </table>
       </div>
@@ -241,7 +245,7 @@
       async function loadData() {
         show("dashboard");
         $("[data-error]").classList.add("hidden");
-        $("[data-tbody]").innerHTML = '<tr><td colspan="9"><div class="skel"></div><div class="skel"></div></td></tr>';
+        $("[data-tbody]").innerHTML = '<tr><td colspan="10"><div class="skel"></div><div class="skel"></div></td></tr>';
         try {
           const q = fs.query(fs.collection(db, "rsvp_submissions"), fs.orderBy("created_at", "desc"));
           const snap = await fs.getDocs(q);
@@ -304,7 +308,8 @@
         $("[data-tbody]").innerHTML = list.map((r) => `<tr class="${r.isLatest ? "" : "stale"}">
           <td>${esc(fmtDate(r.created))}</td><td>${statusBadge(r)}</td><td>${sideBadge(r)}</td><td>${esc(r.name)}</td>
           <td>${phoneCell(r)}</td><td>${r.status === "attending" ? r.party + "명" : "-"}</td>
-          <td>${r.attendees.length ? esc(r.attendees.join(", ")) : "-"}</td><td>${msgCell(r)}</td><td>${stateBadges(r)}</td></tr>`).join("");
+          <td>${r.attendees.length ? esc(r.attendees.join(", ")) : "-"}</td><td>${msgCell(r)}</td><td>${stateBadges(r)}</td>
+          <td><button class="del-btn" data-del="${esc(r.id)}" data-del-name="${esc(r.name)}">삭제</button></td></tr>`).join("");
         $("[data-mobile]").innerHTML = list.map((r) => `<div class="rc ${r.isLatest ? "" : "stale"}">
           <div class="rc-head">${statusBadge(r)} ${sideBadge(r)} ${stateBadges(r)}</div>
           <div class="rc-line"><span class="rc-k">대표자</span> ${esc(r.name)}</div>
@@ -312,7 +317,8 @@
           <div class="rc-line"><span class="rc-k">인원</span> ${r.status === "attending" ? r.party + "명" : "-"}</div>
           <div class="rc-line"><span class="rc-k">참석자</span> ${r.attendees.length ? esc(r.attendees.join(", ")) : "-"}</div>
           <div class="rc-line"><span class="rc-k">전달</span> ${r.message ? esc(r.message) : "-"}</div>
-          <div class="rc-line"><span class="rc-k">일시</span> ${esc(fmtDate(r.created))}</div></div>`).join("");
+          <div class="rc-line"><span class="rc-k">일시</span> ${esc(fmtDate(r.created))}</div>
+          <div class="rc-line" style="margin-top:8px"><button class="del-btn" data-del="${esc(r.id)}" data-del-name="${esc(r.name)}">삭제</button></div></div>`).join("");
       }
 
       let csvUrl = null;
@@ -340,6 +346,22 @@
       }
       async function doLogout() { clearSensitive(); try { await authMod.signOut(auth); } catch {} }
 
+      function toast(m) { const t = $("[data-toast]"); if (!t) return; t.textContent = m; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), 1900); }
+
+      // 삭제(인증 관리자만·규칙에서도 강제). 되돌릴 수 없음 → 확인 후 삭제, 삭제 후 재조회로 집계·중복 재계산.
+      async function doDelete(id, name) {
+        if (!id) return;
+        if (!confirm(`이 응답을 삭제할까요?\n대표자: ${name || "(이름 없음)"}\n\n삭제하면 되돌릴 수 없습니다.`)) return;
+        try {
+          await fs.deleteDoc(fs.doc(db, "rsvp_submissions", id));
+          toast("삭제했습니다.");
+          await loadData();
+        } catch (e) {
+          console.error(e);
+          toast(e.code === "permission-denied" ? "삭제 권한이 없습니다." : "삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        }
+      }
+
       // 이벤트
       $("[data-login]").addEventListener("click", doLogin);
       $("[data-relogin]").addEventListener("click", doLogin);
@@ -352,7 +374,8 @@
       ["[data-f-name]", "[data-f-phone]"].forEach((s) => $(s).addEventListener("input", applyFilters));
       document.addEventListener("click", async (e) => {
         const tm = e.target.closest("[data-toggle-msg]"); if (tm) { tm.closest(".msg").classList.add("open"); return; }
-        const cp = e.target.closest("[data-copy-phone]"); if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copyPhone); cp.textContent = "복사됨"; setTimeout(() => (cp.textContent = "복사"), 1200); } catch {} }
+        const cp = e.target.closest("[data-copy-phone]"); if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copyPhone); cp.textContent = "복사됨"; setTimeout(() => (cp.textContent = "복사"), 1200); } catch {} return; }
+        const dl = e.target.closest("[data-del]"); if (dl) { doDelete(dl.dataset.del, dl.dataset.delName); return; }
       });
 
       // ---- 인증 상태머신 (P0: 무한 로그인 반복 방지) ----
@@ -407,5 +430,6 @@
       }
       bootstrap();
     </script>
+    <div class="toast" data-toast role="status" aria-live="polite"></div>
   </body>
 </html>

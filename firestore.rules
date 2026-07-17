@@ -49,7 +49,7 @@ service cloud.firestore {
     match /rsvp_submissions/{docId} {
       allow read: if isRsvpAdmin();
       allow update: if false;
-      allow delete: if false;
+      allow delete: if isRsvpAdmin();
 
       allow create: if
         request.resource.data.keys().hasOnly([
