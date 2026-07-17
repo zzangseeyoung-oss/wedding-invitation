@@ -1,10 +1,7 @@
 /*
  * 시네마틱 인트로 — 고정 스테이지 기반 스크롤 시퀀스.
- *
- * 기본(무 JS): 첫 외관 한 화면만 보여준 뒤 본문으로 이어진다.
- * JS 활성 시: 하나의 sticky 뷰포트 안에서 외관 → 실내 → 청첩장이
- * 크로스페이드·카메라 이동으로 전환되고, 마지막에 아이보리 본문으로 풀린다.
- * RSVP/방명록/음악/지도 코드와 완전히 분리되어 있다.
+ * 기본(무 JS): 외관 한 화면 후 본문으로 이어진다.
+ * JS 활성: 하나의 sticky 뷰포트에서 외관 → 실내 → 청첩장이 전환된다.
  */
 
 .cine-intro {
@@ -15,9 +12,234 @@
   isolation: isolate;
 }
 
-/* 인트로가 있을 때 기존 수채화 히어로는 숨김. */
-.cine-intro + .hero {
-  display: none;
+.cine-intro + .hero { display: none; }
+
+/* JS가 실행되면 스크롤 진행 거리만 확보하고, 화면은 하나의 stage에 고정한다. */
+.invitation.cine-pinned { overflow: visible; }
+.cine-intro.js-on {
+  height: 360svh;
+  min-height: 2200px;
 }
 
-/* sticky가 조상 overflow:hidden에 막히지 않도록 JS 활성 때만 해제한다. */
+.cine-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 620px;
+  overflow: hidden;
+  background: #11150f;
+  isolation: isolate;
+}
+
+/* 무 JS 폴백: 첫 장면만 정상 흐름으로 보이고 나머지는 숨긴다. */
+.cine-scene {
+  position: relative;
+  height: 100svh;
+  min-height: 620px;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  isolation: isolate;
+}
+.cine-intro:not(.js-on) .cine-scene:not(:first-of-type) { display: none; }
+
+/* JS 활성 시 모든 장면을 같은 좌표에 겹친다. */
+.cine-intro.js-on .cine-scene {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  min-height: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+.cine-intro.js-on .cine-scene:first-child {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cine-bg,
+.cine-img,
+.cine-veil {
+  position: absolute;
+  inset: 0;
+}
+.cine-bg {
+  z-index: 0;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+.cine-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity .7s ease;
+  will-change: opacity, transform, filter;
+}
+.cine-img.loaded { opacity: 1; }
+.cs-ceremony .cine-img { object-position: center 68%; }
+.cs-invitation .cine-img { object-position: center 42%; }
+
+.cine-veil {
+  z-index: 1;
+  background: linear-gradient(to top, rgba(16,20,15,.84) 0%, rgba(16,20,15,.55) 24%, rgba(16,20,15,.16) 58%, rgba(16,20,15,0) 84%);
+  pointer-events: none;
+}
+.cs-ceremony .cine-veil {
+  background: linear-gradient(to top, rgba(15,18,14,.86) 0%, rgba(15,18,14,.59) 25%, rgba(15,18,14,.18) 61%, rgba(15,18,14,0) 88%);
+}
+.cs-invitation .cine-veil {
+  background: linear-gradient(to top, rgba(20,20,15,.82) 0%, rgba(20,20,15,.46) 27%, rgba(20,20,15,.08) 64%, rgba(20,20,15,0) 88%);
+}
+
+.cine-copy {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 650px);
+  padding: 0 26px 11svh;
+  color: #fdfbf5;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0,0,0,.62), 0 3px 28px rgba(0,0,0,.54);
+  will-change: opacity, transform;
+}
+.cine-copy::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 46%;
+  width: 122%;
+  height: 165%;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(ellipse, rgba(12,16,12,.57), rgba(12,16,12,.24) 48%, transparent 75%);
+  pointer-events: none;
+}
+.cine-hero-copy { padding-bottom: 13svh; }
+.cine-kicker,
+.cine-line {
+  margin: 0 0 14px;
+  font: 500 clamp(.72rem,3vw,.86rem)/1 var(--english,"Cormorant Garamond",serif);
+  letter-spacing: .38em;
+  text-transform: uppercase;
+  opacity: .9;
+}
+.cine-names {
+  margin: 0;
+  font: 500 clamp(2.05rem,9vw,3.2rem)/1.18 var(--serif,"Noto Serif KR",serif);
+  letter-spacing: .03em;
+}
+.cine-names span { font-size: .7em; opacity: .8; margin: 0 .12em; }
+.cine-date {
+  margin: 18px 0 4px;
+  font: 400 clamp(.9rem,3.6vw,1.02rem)/1.5 var(--sans,"Noto Sans KR",sans-serif);
+  letter-spacing: .05em;
+}
+.cine-place {
+  margin: 0;
+  font: 400 clamp(.84rem,3.4vw,.96rem)/1.5 var(--sans,"Noto Sans KR",sans-serif);
+  opacity: .94;
+}
+.cine-title {
+  margin: 0;
+  font: 500 clamp(1.48rem,6.4vw,2.1rem)/1.5 var(--serif,"Noto Serif KR",serif);
+  word-break: keep-all;
+}
+.cine-sub {
+  margin: 13px 0 0;
+  font: 400 clamp(.88rem,3.6vw,1rem)/1.7 var(--sans,"Noto Sans KR",sans-serif);
+  opacity: .95;
+  word-break: keep-all;
+}
+
+.cine-skip {
+  position: absolute;
+  z-index: 20;
+  top: max(14px, env(safe-area-inset-top));
+  left: 14px;
+  padding: 8px 14px;
+  border: 1px solid rgba(253,251,245,.34);
+  border-radius: 20px;
+  background: rgba(16,20,15,.45);
+  color: #fdfbf5;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  font: 500 .76rem/1 var(--sans,"Noto Sans KR",sans-serif);
+  text-decoration: none;
+}
+
+.cine-cue {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  color: #fdfbf5;
+  font: 500 .72rem/1 var(--sans,"Noto Sans KR",sans-serif);
+  letter-spacing: .2em;
+  text-shadow: 0 2px 12px rgba(0,0,0,.55);
+  transition: opacity .35s ease;
+}
+.cine-cue span { font-size: 1.08rem; animation: cine-bob 1.7s ease-in-out infinite; }
+.cine-intro.has-progress .cine-cue { opacity: 0; }
+@keyframes cine-bob { 50% { transform: translateY(6px); } }
+
+/* 진행 표시: 영화의 타임라인처럼 아주 얇게만 보인다. */
+.cine-progress {
+  position: absolute;
+  z-index: 18;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(150px, 36vw);
+  height: 2px;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,.24);
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.cine-intro.has-progress .cine-progress { opacity: .8; }
+.cine-progress > i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #fffaf0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+/* 마지막 프레임이 본문 종이에 녹아들도록 하단을 아이보리로 페이드한다. */
+.cine-paper-fade {
+  position: absolute;
+  z-index: 9;
+  inset: auto 0 0;
+  height: 26svh;
+  background: linear-gradient(to bottom, transparent, rgba(248,240,223,.18) 38%, #f8f0df 100%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity;
+}
+
+@media (min-width: 700px) {
+  .cine-intro.js-on { height: 330svh; }
+  .cine-copy { padding-bottom: 10svh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cine-intro,
+  .cine-intro.js-on { height: 100svh !important; min-height: 620px; }
+  .cine-stage { position: relative; }
+  .cine-intro.js-on .cine-scene { display: none; }
+  .cine-intro.js-on .cine-scene:first-child { display: grid; opacity: 1 !important; visibility: visible !important; }
+  .cine-img { transform: none !important; filter: none !important; animation: none !important; }
+  .cine-copy { opacity: 1 !important; transform: none !important; }
+  .cine-cue span { animation: none; }
+  .cine-progress,
+  .cine-paper-fade { display: none; }
+}
