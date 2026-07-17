@@ -4,11 +4,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex,nofollow,noarchive" />
+    <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
     <title>이동 중… · 비공개</title>
     <script>
-      // 관리자 앱은 모바일 인증 안정성을 위해 Firebase Hosting에서 제공한다.
+      // v2 (2026-07-18): 관리자 canonical = firebaseapp.com(=authDomain, 동일 출처 → 모바일 redirect 인증 정상).
       // 이 페이지는 인증/데이터를 다루지 않고 즉시 이동만 한다.
-      var ADMIN_HOSTING_URL = "https://wedding-sygy-20261010.web.app/admin/attendance.html";
+      var ADMIN_HOSTING_URL = "https://wedding-sygy-20261010.firebaseapp.com/admin/attendance.html";
       location.replace(ADMIN_HOSTING_URL);
     </script>
     <style>
@@ -19,7 +20,7 @@
   <body>
     <div>
       <p>관리자 화면으로 이동 중입니다…</p>
-      <p>자동으로 이동하지 않으면 <a href="https://wedding-sygy-20261010.web.app/admin/attendance.html">여기</a>를 눌러주세요.</p>
+      <p>자동으로 이동하지 않으면 <a href="https://wedding-sygy-20261010.firebaseapp.com/admin/attendance.html">여기</a>를 눌러주세요.</p>
     </div>
   </body>
 </html>

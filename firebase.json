@@ -11,6 +11,18 @@
         "headers": [
           { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
         ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store, max-age=0" }
+        ]
+      },
+      {
+        "source": "/firebase-config.js",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-store, max-age=0" }
+        ]
       }
     ]
   }
