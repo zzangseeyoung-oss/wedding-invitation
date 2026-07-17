@@ -3,3 +3,4 @@ Thumbs.db
 *.log
 mobile-url.txt
 assets/mobile_qr.png
+.firebase/
