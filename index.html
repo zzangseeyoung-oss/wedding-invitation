@@ -17,8 +17,9 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400;500;600&amp;display=swap"
       rel="stylesheet"
     />
-    <link rel="preload" href="assets/cover-scene.jpg" as="image" />
+    <link rel="preload" href="assets/scene-01-exterior.webp" as="image" fetchpriority="high" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="cinematic-intro.css" />
   </head>
   <body>
     <audio id="wedding-bgm" loop preload="auto" playsinline>
@@ -28,6 +29,60 @@
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v11" /><circle cx="6" cy="18" r="2.6" /><circle cx="16" cy="15" r="2.6" /><line class="bgm-slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" /></svg>
     </button>
     <main class="invitation">
+      <div class="cine-intro" data-cine>
+        <a class="cine-skip" href="#invitation-title">본문 바로가기</a>
+
+        <section class="cine-scene cs-exterior" aria-label="용인 코티지 보타닉 하우스">
+          <div class="cine-bg" style="background-image:url('data:image/webp;base64,UklGRmYAAABXRUJQVlA4IFoAAAAQBACdASoYAA4APu1iqU2ppaQiMAgBMB2JQBAAASfj/kk8kdr91WKaAAD5X4elOrRvTo1WJq1i77bRfUbDNeBE+2GdLwR4uOeoKJAxHb4WaxxQQ2JoznCwAAA=')">
+            <img class="cine-img" src="assets/scene-01-exterior.webp" alt="용인 코티지 보타닉 하우스 외관 — 유리 온실과 초가을 정원" fetchpriority="high" decoding="async" />
+          </div>
+          <div class="cine-veil"></div>
+          <div class="cine-copy cine-hero-copy">
+            <p class="cine-kicker">Wedding Invitation</p>
+            <h1 class="cine-names">장시영 <span>&amp;</span> 이근영</h1>
+            <p class="cine-date">2026. 10. 10. SAT · 12:30 PM</p>
+            <p class="cine-place">용인 코티지 보타닉 하우스</p>
+          </div>
+          <div class="cine-cue" aria-hidden="true">아래로<span>↓</span></div>
+        </section>
+
+        <section class="cine-scene cs-entry" data-reveal aria-label="예식홀로 들어가는 입구">
+          <div class="cine-bg" style="background-image:url('data:image/webp;base64,UklGRmQAAABXRUJQVlA4IFgAAACwAwCdASoYAA4APu1oqk6ppiQiMAgBMB2JQBOgAxtNAOPuw5Y2wAD+hu1Nbl1WaCnig5EZDequmhqY1bUz+luSAnYlTOZPNeUeQsj5CkkOo8cATa8AAAAA')">
+            <img class="cine-img" src="assets/scene-02-entry.webp" alt="나무문 너머로 보이는 예식홀 입구" loading="lazy" decoding="async" />
+          </div>
+          <div class="cine-veil"></div>
+          <div class="cine-copy">
+            <p class="cine-line">Welcome</p>
+            <h2 class="cine-title">문을 열고, 안으로</h2>
+            <p class="cine-sub">두 사람의 계절로 초대합니다</p>
+          </div>
+        </section>
+
+        <section class="cine-scene cs-ceremony" data-reveal aria-label="예식이 진행되는 공간">
+          <div class="cine-bg" style="background-image:url('data:image/webp;base64,UklGRmIAAABXRUJQVlA4IFYAAACwAwCdASoYAA4APu1iqk2ppaQiMAgBMB2JZQCo9A8IoHN7e1lXsAD+tRWAdyEc9tlRHnr5e3aKywtthlfhcglZxFrzGEa+E2/F/OlYz7sBm1T9dAAAAA==')">
+            <img class="cine-img" src="assets/scene-03-ceremony.webp" alt="높은 천장과 큰 창, 들꽃으로 꾸며진 예식 공간" loading="lazy" decoding="async" />
+          </div>
+          <div class="cine-veil"></div>
+          <div class="cine-copy">
+            <p class="cine-line">The Place</p>
+            <h2 class="cine-title">높은 창과 들꽃 사이에서</h2>
+            <p class="cine-sub">이 공간에서 두 사람의 예식이 진행됩니다</p>
+          </div>
+        </section>
+
+        <section class="cine-scene cs-invitation" data-reveal aria-label="식탁 위의 청첩장">
+          <div class="cine-bg" style="background-image:url('data:image/webp;base64,UklGRlwAAABXRUJQVlA4IFAAAACQAwCdASoYAA4APu1kqU2ppaOiMAgBMB2JQBUeglMaYkH43UoAAP6OquECiDQPNupS5xf5VMe3gCkMK5JSsUN6oaz9piYHPDsCeNo8KgAAAA==')">
+            <img class="cine-img" src="assets/scene-04-invitation.webp" alt="식탁 위에 놓인 청첩장과 들꽃" loading="lazy" decoding="async" />
+          </div>
+          <div class="cine-veil"></div>
+          <div class="cine-copy">
+            <p class="cine-line">Invitation</p>
+            <h2 class="cine-title">이제, 초대장을 펼쳐 주세요</h2>
+            <p class="cine-sub">천천히 아래로 읽어 내려가 주시면 됩니다</p>
+          </div>
+        </section>
+      </div>
+
       <section class="hero" aria-labelledby="couple-names">
         <picture class="hero-media">
           <img src="assets/cover-scene.jpg" alt="가을 정원의 온실 앞에 나란히 선 신랑 신부 수채화" fetchpriority="high" />
@@ -534,6 +589,7 @@
     </div>
 
     <div class="toast" role="status" aria-live="polite"></div>
+    <script src="cinematic-intro.js" defer></script>
     <script src="script.js"></script>
     <script type="module" src="guestbook.js"></script>
     <script type="module" src="rsvp.js"></script>
