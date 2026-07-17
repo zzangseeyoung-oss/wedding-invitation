@@ -132,6 +132,7 @@
       <section class="paper-section location" aria-labelledby="location-title">
         <p class="section-kicker">Location</p>
         <h2 id="location-title">오시는 길</h2>
+        <div class="short-rule" aria-hidden="true"></div>
         <p class="venue">용인 코티지 보타닉 하우스</p>
         <p class="address">경기 용인시 처인구 신송로55번길 10</p>
 
@@ -151,12 +152,86 @@
           <button type="button" data-copy="경기 용인시 처인구 신송로55번길 10">주소 복사</button>
         </div>
 
-        <dl class="transport">
-          <div><dt>자가용</dt><dd>내비게이션에 ‘용인 코티지 보타닉 하우스’ 검색</dd></div>
-          <div><dt>주차</dt><dd>현장 주차 가능 / 안내에 따라 이용</dd></div>
-          <div><dt>버스</dt><dd>용인공용버스터미널 하차 후 택시 · 금계천안마을 정류장 도보</dd></div>
-          <div><dt>기차</dt><dd>KTX 수원역 / SRT 동탄역 하차 후 택시 이용</dd></div>
-        </dl>
+        <div class="direction-guide">
+          <div class="direction-group">
+            <h3 class="direction-heading">대중교통</h3>
+            <ul class="direction-list">
+              <li class="direction-item">
+                <span class="direction-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="14" rx="2.5"/><path d="M6 12h12"/><circle cx="9" cy="14.5" r="1"/><circle cx="15" cy="14.5" r="1"/><path d="M9 21l1.5-2M15 21l-1.5-2"/></svg>
+                </span>
+                <div class="direction-text">
+                  <b>지하철 · 기차</b>
+                  <p>가까운 지하철역은 없어요. KTX 수원역 또는 SRT 동탄역에서 내려 택시로 이동하시는 것이 편합니다.</p>
+                </div>
+              </li>
+              <li class="direction-item">
+                <span class="direction-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="12" rx="2.5"/><path d="M4 11h16"/><circle cx="8" cy="19" r="1.4"/><circle cx="16" cy="19" r="1.4"/><path d="M6 16v2M18 16v2"/></svg>
+                </span>
+                <div class="direction-text">
+                  <b>버스</b>
+                  <p>용인공용버스터미널에서 내려 택시로 오시거나, ‘금계천안마을’ 정류장에서 내려 도보로 오실 수 있어요.</p>
+                </div>
+              </li>
+              <li class="direction-item">
+                <span class="direction-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-3l2-5a2 2 0 0 1 1.9-1.3h8.2A2 2 0 0 1 18 8l2 5v3"/><path d="M4 16h16v2a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1M6 19a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-1M9 4h6"/><circle cx="7.5" cy="13.5" r="1"/><circle cx="16.5" cy="13.5" r="1"/></svg>
+                </span>
+                <div class="direction-text">
+                  <b>택시</b>
+                  <p>용인 시내나 터미널에서 ‘용인 코티지 보타닉 하우스’로 말씀하시면 됩니다.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="direction-group">
+            <h3 class="direction-heading">자가용 · 주차</h3>
+            <ul class="direction-list">
+              <li class="direction-item">
+                <span class="direction-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17v-3l1.6-4.2A2 2 0 0 1 8.5 8.5h7a2 2 0 0 1 1.9 1.3L19 14v3"/><path d="M5 17h14v1.5a1 1 0 0 1-1 1h-1.2a1 1 0 0 1-1-1M8.2 18.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V17"/><circle cx="8" cy="14" r="1"/><circle cx="16" cy="14" r="1"/></svg>
+                </span>
+                <div class="direction-text">
+                  <b>자가용</b>
+                  <p>내비게이션에 ‘용인 코티지 보타닉 하우스’ 또는 ‘신송로55번길 10’을 검색하세요.</p>
+                </div>
+              </li>
+              <li class="direction-item">
+                <span class="direction-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9.5 16V8h3.2a2.4 2.4 0 0 1 0 4.8H9.5"/></svg>
+                </span>
+                <div class="direction-text">
+                  <b>주차</b>
+                  <p>현장에 주차하실 수 있어요. 도착하시면 안내에 따라 이용해 주세요.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="paper-section rsvp-section" aria-labelledby="rsvp-title">
+        <p class="section-kicker">R.S.V.P.</p>
+        <h2 id="rsvp-title">참석 의사 전달</h2>
+        <div class="short-rule" aria-hidden="true"></div>
+        <p class="rsvp-desc">
+          스몰웨딩으로 진행되는 예식인 만큼<br />
+          참석 여부와 동행 인원을 미리 알려주시면<br />
+          준비에 큰 도움이 됩니다.
+        </p>
+        <button
+          type="button"
+          class="rsvp-open"
+          data-rsvp-toggle
+          aria-controls="rsvp-modal"
+          aria-expanded="false"
+        >
+          <span class="rsvp-open-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#eacb83" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/><path d="M9 18l2.2-2.2"/></svg></span>
+          <span>참석 의사 전달하기</span>
+        </button>
+        <p class="rsvp-mode-note" data-rsvp-mode hidden></p>
       </section>
 
       <section class="paper-section account-section" aria-labelledby="account-title">
@@ -336,9 +411,120 @@
       </div>
     </div>
 
+    <div
+      class="rsvp-modal"
+      id="rsvp-modal"
+      data-rsvp-modal
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="rsvp-modal-title"
+      hidden
+    >
+      <button class="rsvp-backdrop" type="button" data-rsvp-close aria-label="참석 의사 창 닫기"></button>
+      <div class="rsvp-panel" tabindex="-1">
+        <div class="rsvp-heading">
+          <span id="rsvp-modal-title">참석 의사 전달</span>
+          <button type="button" class="rsvp-close-btn" data-rsvp-close aria-label="닫기">×</button>
+        </div>
+
+        <form class="rsvp-form" data-rsvp-form novalidate>
+          <div class="rsvp-field">
+            <span class="field-label">참석 여부 <em>필수</em></span>
+            <div class="rsvp-choice" role="radiogroup" aria-label="참석 여부">
+              <label class="rsvp-choice-item">
+                <input type="radio" name="status" value="attending" />
+                <span>참석 가능</span>
+              </label>
+              <label class="rsvp-choice-item">
+                <input type="radio" name="status" value="not_attending" />
+                <span>참석 불가</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="rsvp-common" data-rsvp-common hidden>
+            <label class="rsvp-field">
+              <span class="field-label">성함 <em>필수</em></span>
+              <input type="text" name="respondent_name" maxlength="20" autocomplete="name" placeholder="성함을 입력해 주세요" />
+            </label>
+
+            <div class="rsvp-field">
+              <span class="field-label">구분 <em>필수</em></span>
+              <div class="rsvp-choice" role="radiogroup" aria-label="하객 구분">
+                <label class="rsvp-choice-item">
+                  <input type="radio" name="side" value="groom" />
+                  <span>신랑측</span>
+                </label>
+                <label class="rsvp-choice-item">
+                  <input type="radio" name="side" value="bride" />
+                  <span>신부측</span>
+                </label>
+              </div>
+            </div>
+
+            <label class="rsvp-field">
+              <span class="field-label">연락처 <em>필수</em></span>
+              <input type="tel" name="phone" inputmode="numeric" maxlength="20" autocomplete="tel" placeholder="연락 가능한 휴대폰 번호" />
+            </label>
+
+            <div class="rsvp-attending" data-rsvp-attending hidden>
+              <div class="rsvp-field">
+                <span class="field-label">총 참석 인원 <em>본인 포함</em></span>
+                <div class="rsvp-stepper">
+                  <button type="button" class="rsvp-step" data-rsvp-minus aria-label="인원 줄이기">−</button>
+                  <input type="number" name="party_size" min="1" max="20" value="1" inputmode="numeric" readonly aria-label="총 참석 인원" />
+                  <button type="button" class="rsvp-step" data-rsvp-plus aria-label="인원 늘리기">＋</button>
+                </div>
+              </div>
+              <div class="rsvp-field">
+                <span class="field-label">참석자 이름 <em>인원 수만큼</em></span>
+                <div class="rsvp-attendees" data-rsvp-attendees></div>
+              </div>
+              <label class="rsvp-field">
+                <span class="field-label">전달사항 <em>선택</em></span>
+                <textarea name="message_attending" maxlength="200" rows="3" placeholder="전달하실 말씀이 있으면 적어주세요"></textarea>
+              </label>
+            </div>
+
+            <div class="rsvp-declining" data-rsvp-declining hidden>
+              <label class="rsvp-field">
+                <span class="field-label">전달사항 <em>선택</em></span>
+                <textarea name="message_declining" maxlength="200" rows="3" placeholder="축하 인사나 전달하실 말씀을 적어주세요"></textarea>
+              </label>
+            </div>
+
+            <label class="rsvp-consent">
+              <input type="checkbox" name="privacy_consent" />
+              <span>참석 여부 확인 및 예식 준비를 위한 개인정보(성함·연락처·참석 인원) 수집 및 이용에 동의합니다.</span>
+            </label>
+            <details class="rsvp-privacy-detail">
+              <summary>수집 항목 자세히 보기</summary>
+              <p>참석 여부 확인 및 예식 준비를 위해 성함, 연락처, 참석 인원 정보를 수집합니다. 수집된 정보는 예식 준비 목적 외에는 사용되지 않으며, 청첩장 이용 종료 후 안전하게 관리됩니다.</p>
+            </details>
+
+            <p class="rsvp-error" data-rsvp-error hidden></p>
+            <button type="submit" class="rsvp-submit" data-rsvp-submit>참석 의사 전달하기</button>
+          </div>
+        </form>
+
+        <div class="rsvp-success" data-rsvp-success hidden>
+          <div class="rsvp-success-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="#2f5d3a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="20" stroke="#c1a24a" stroke-width="1.4"/><path d="M15 24.5l6 6 12-13"/></svg>
+          </div>
+          <p class="rsvp-success-title" data-rsvp-success-title>참석 의사가 정상적으로 전달되었습니다.</p>
+          <p class="rsvp-success-sub">소중한 답변 감사합니다.</p>
+          <div class="rsvp-success-actions">
+            <button type="button" class="rsvp-again" data-rsvp-again>다시 작성하기</button>
+            <button type="button" class="rsvp-done" data-rsvp-close>닫기</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="toast" role="status" aria-live="polite"></div>
     <script src="script.js"></script>
     <script type="module" src="guestbook.js"></script>
+    <script type="module" src="rsvp.js"></script>
     <script type="module" src="dael-rael.js"></script>
   </body>
 </html>

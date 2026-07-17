@@ -1815,9 +1815,433 @@ body.dael-rael-open {
   opacity: 0;
 }
 body.dael-rael-open .bgm-toggle,
-body.guestbook-is-open .bgm-toggle {
+body.guestbook-is-open .bgm-toggle,
+body.rsvp-is-open .bgm-toggle {
   opacity: 0;
   pointer-events: none;
+}
+body.rsvp-is-open {
+  overflow: hidden;
+}
+
+/* ==================== 오시는 길 — 이동 안내 ==================== */
+.direction-guide {
+  margin-top: 20px;
+  display: grid;
+  gap: 18px;
+  text-align: left;
+}
+.direction-group {
+  display: grid;
+  gap: 10px;
+}
+.direction-heading {
+  margin: 0;
+  color: var(--green-dark);
+  font: 600 0.82rem/1.3 var(--sans);
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.direction-heading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line-soft);
+}
+.direction-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.direction-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--paper-light);
+}
+.direction-mark {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--green);
+  background: rgba(61, 106, 84, 0.08);
+}
+.direction-text b {
+  display: block;
+  color: var(--ink);
+  font: 600 0.9rem/1.4 var(--sans);
+  margin-bottom: 2px;
+}
+.direction-text p {
+  margin: 0;
+  color: var(--text);
+  font: 400 0.86rem/1.55 var(--sans);
+}
+
+/* ==================== RSVP 섹션 카드 ==================== */
+.rsvp-section {
+  text-align: center;
+}
+.rsvp-desc {
+  margin: 14px 0 20px;
+  color: var(--text);
+  font: 400 clamp(14.5px, 3.8vw, 15.5px)/1.7 var(--sans);
+}
+.rsvp-open {
+  width: min(100%, 320px);
+  min-height: 54px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid var(--green-dark);
+  border-radius: 6px;
+  background: var(--green-dark);
+  color: #fff;
+  font: 600 1rem/1.3 var(--sans);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(31, 56, 41, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.rsvp-open:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(31, 56, 41, 0.24);
+}
+.rsvp-open:active {
+  transform: translateY(0);
+}
+.rsvp-open-mark {
+  display: inline-flex;
+}
+.rsvp-mode-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font: 400 0.78rem/1.5 var(--sans);
+}
+
+/* ==================== RSVP 모달 ==================== */
+.rsvp-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  align-items: end;
+  padding: 18px max(12px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+/* display 오버라이드가 [hidden]을 덮지 않도록 명시(모달이 항상 화면을 덮는 버그 방지) */
+.rsvp-modal[hidden],
+.rsvp-form[hidden],
+.rsvp-common[hidden],
+.rsvp-attending[hidden],
+.rsvp-declining[hidden],
+.rsvp-success[hidden] {
+  display: none;
+}
+.rsvp-backdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(24, 32, 26, 0.5);
+  cursor: pointer;
+}
+.rsvp-panel {
+  position: relative;
+  width: min(100%, 480px);
+  max-height: min(680px, calc(100svh - 36px));
+  margin: 0 auto;
+  padding: 18px 18px 22px;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--green-dark);
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(0deg, rgba(93, 83, 58, 0.018) 0 1px, transparent 1px 5px),
+    var(--paper-light);
+  box-shadow: 0 24px 70px rgba(16, 27, 20, 0.28);
+  overflow: auto;
+  animation: rsvp-sheet-in 220ms ease-out;
+}
+@keyframes rsvp-sheet-in {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.rsvp-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  color: var(--ink);
+  font: 600 1.05rem/1.3 var(--serif);
+}
+.rsvp-close-btn {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.rsvp-form {
+  display: grid;
+  gap: 16px;
+}
+.rsvp-common {
+  display: grid;
+  gap: 16px;
+}
+.rsvp-field {
+  display: grid;
+  gap: 8px;
+}
+.rsvp-field .field-label em {
+  margin-left: 6px;
+  color: var(--muted);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.76rem;
+}
+.rsvp-field input[type="text"],
+.rsvp-field input[type="tel"],
+.rsvp-field textarea {
+  width: 100%;
+  padding: 12px 13px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font: 400 0.95rem/1.5 var(--sans);
+}
+.rsvp-field textarea {
+  resize: vertical;
+  min-height: 66px;
+}
+.rsvp-field input:focus,
+.rsvp-field textarea:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(61, 106, 84, 0.14);
+}
+
+/* 세그먼트 선택 (참석여부 / 신랑·신부측) */
+.rsvp-choice {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.rsvp-choice-item {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+.rsvp-choice-item input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.rsvp-choice-item span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--text);
+  font: 500 0.95rem/1.3 var(--sans);
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+.rsvp-choice-item input:checked + span {
+  border-color: var(--green-dark);
+  background: var(--green-dark);
+  color: #fff;
+  font-weight: 600;
+}
+.rsvp-choice-item input:focus-visible + span {
+  box-shadow: 0 0 0 3px rgba(61, 106, 84, 0.22);
+}
+
+/* 인원 stepper */
+.rsvp-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+}
+.rsvp-step {
+  width: 48px;
+  height: 48px;
+  border: 0;
+  background: #fff;
+  color: var(--green-dark);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.rsvp-step:active {
+  background: rgba(61, 106, 84, 0.1);
+}
+.rsvp-stepper input {
+  width: 62px;
+  height: 48px;
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  text-align: center;
+  font: 600 1.05rem/1 var(--sans);
+  color: var(--ink);
+  background: #fff;
+  -moz-appearance: textfield;
+}
+.rsvp-stepper input::-webkit-outer-spin-button,
+.rsvp-stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 참석자 이름 목록 */
+.rsvp-attendees {
+  display: grid;
+  gap: 8px;
+}
+.rsvp-attendee-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.rsvp-attendee-tag {
+  flex: 0 0 auto;
+  min-width: 62px;
+  color: var(--muted);
+  font: 500 0.8rem/1.3 var(--sans);
+}
+.rsvp-attendee-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 개인정보 동의 */
+.rsvp-consent {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 13px;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: rgba(61, 106, 84, 0.04);
+  color: var(--text);
+  font: 400 0.83rem/1.55 var(--sans);
+  cursor: pointer;
+}
+.rsvp-consent input {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  accent-color: var(--green-dark);
+}
+.rsvp-privacy-detail {
+  margin-top: -6px;
+}
+.rsvp-privacy-detail summary {
+  color: var(--muted);
+  font: 400 0.8rem/1.4 var(--sans);
+  cursor: pointer;
+}
+.rsvp-privacy-detail p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font: 400 0.8rem/1.6 var(--sans);
+}
+.rsvp-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: rgba(178, 58, 58, 0.08);
+  color: #a5342f;
+  font: 500 0.85rem/1.5 var(--sans);
+}
+.rsvp-submit {
+  min-height: 54px;
+  border: 1px solid var(--green-dark);
+  border-radius: 6px;
+  background: var(--green-dark);
+  color: #fff;
+  font: 600 1rem/1.3 var(--sans);
+  cursor: pointer;
+}
+.rsvp-submit:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* 성공 화면 */
+.rsvp-success {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px 8px 12px;
+  text-align: center;
+}
+.rsvp-success-mark {
+  margin-bottom: 4px;
+}
+.rsvp-success-title {
+  margin: 0;
+  color: var(--ink);
+  font: 600 1.02rem/1.5 var(--serif);
+}
+.rsvp-success-sub {
+  margin: 0;
+  color: var(--muted);
+  font: 400 0.88rem/1.6 var(--sans);
+}
+.rsvp-success-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+.rsvp-again,
+.rsvp-done {
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 6px;
+  font: 600 0.92rem/1.3 var(--sans);
+  cursor: pointer;
+}
+.rsvp-again {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--green-dark);
+}
+.rsvp-done {
+  border: 1px solid var(--green-dark);
+  background: var(--green-dark);
+  color: #fff;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rsvp-panel { animation: none; }
+  .rsvp-open { transition: none; }
 }
 
 /* 입력 검증 안내(구두점만 입력 등) — §8 */

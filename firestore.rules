@@ -35,5 +35,52 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if true;
     }
+
+    // 참석 의사 전달(RSVP): 이름·연락처 등 개인정보 수집 → 공개 조회/수정/삭제 전면 금지.
+    // 생성만 허용하되 스키마·정합성(참석 시 인원>=1 && 이름수==인원, 불참 시 0/빈배열)을 강제.
+    match /rsvp_submissions/{docId} {
+      allow read: if false;
+      allow update: if false;
+      allow delete: if false;
+
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'status', 'side', 'respondent_name', 'phone', 'party_size',
+          'attendees', 'message', 'privacy_consent', 'created_at', 'updated_at', 'source'
+        ])
+        && request.resource.data.status in ['attending', 'not_attending']
+        && request.resource.data.side in ['groom', 'bride']
+        && request.resource.data.respondent_name is string
+        && request.resource.data.respondent_name.size() >= 1
+        && request.resource.data.respondent_name.size() <= 20
+        && request.resource.data.phone is string
+        && request.resource.data.phone.size() >= 9
+        && request.resource.data.phone.size() <= 11
+        && request.resource.data.phone.matches('^[0-9]+$')
+        && request.resource.data.party_size is int
+        && request.resource.data.party_size >= 0
+        && request.resource.data.party_size <= 20
+        && request.resource.data.attendees is list
+        && request.resource.data.attendees.size() <= 20
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 200
+        && request.resource.data.privacy_consent == true
+        && request.resource.data.source is string
+        && request.resource.data.source.size() <= 40
+        && request.resource.data.created_at == request.time
+        && request.resource.data.updated_at == request.time
+        && (
+          (
+            request.resource.data.status == 'attending'
+            && request.resource.data.party_size >= 1
+            && request.resource.data.attendees.size() == request.resource.data.party_size
+          )
+          || (
+            request.resource.data.status == 'not_attending'
+            && request.resource.data.party_size == 0
+            && request.resource.data.attendees.size() == 0
+          )
+        );
+    }
   }
 }
