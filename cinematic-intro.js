@@ -179,6 +179,13 @@
     else if (!done) finishAtEnd();
   }
 
+  // 개봉/스킵 후 본문 제목으로 포커스 이동(키보드·스크린리더 맥락 유지)
+  function focusBody() {
+    if (!bodyTarget) return;
+    bodyTarget.setAttribute("tabindex", "-1");
+    try { bodyTarget.focus({ preventScroll: true }); } catch (e) {}
+  }
+
   // ── 카드 열림 → 안쪽 확대 → 실제 본문 모프 ──
   function openAndMorph() {
     if (opened) return; opened = true; done = true;
@@ -188,7 +195,7 @@
     releaseWillChange();
 
     if (reduce) { // 모션 최소화: 즉시 본문
-      if (bodyTarget) bodyTarget.scrollIntoView({ block: "start" });
+      if (bodyTarget) { bodyTarget.scrollIntoView({ block: "start" }); focusBody(); }
       return;
     }
 
@@ -209,7 +216,7 @@
         requestAnimationFrame(() => {
           morph.style.transition = "opacity .6s ease";
           morph.classList.remove("on");
-          window.setTimeout(() => { morph.style.pointerEvents = "none"; }, 620);
+          window.setTimeout(() => { morph.style.pointerEvents = "none"; focusBody(); }, 640);
         });
       }, 760);
     }, 1080);
@@ -222,7 +229,8 @@
     done = true; if (rafId) cancelAnimationFrame(rafId);
     cardStage.style.display = "none"; morph.style.display = "none";
     releaseWillChange();
-    // 앵커 기본 동작(#invitation-title)로 본문 이동
+    // 앵커 기본 동작(#invitation-title)로 본문 이동 + 포커스 이동
+    window.setTimeout(focusBody, 60);
   });
 
   // 스크롤 임계: 막지 않되 인트로 즉시 완료(카드 정착 + 버튼)

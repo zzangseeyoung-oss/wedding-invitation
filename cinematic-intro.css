@@ -8,13 +8,17 @@
 
 .cine-intro {
   position: relative;
-  height: 100svh;
+  height: 100vh;
+  height: 100svh; /* svh 미지원 구형 엔진은 위 100vh로 폴백 */
   min-height: 620px;
   background: #10130e;
   isolation: isolate;
   overflow: hidden;
 }
 .cine-intro + .hero { display: none; }
+
+/* 무 JS(또는 JS 조기 오류) 폴백: 외관 실사진이 항상 보이도록(.loaded는 JS 전용) */
+.cine-intro:not(.js-on) .cs-exterior .cine-img { opacity: 1; }
 
 .cine-scene {
   position: absolute;
@@ -173,11 +177,11 @@
   background: rgba(18,24,16,.52); color: #fdf7ea;
   backdrop-filter: blur(9px); -webkit-backdrop-filter: blur(9px);
   font: 600 clamp(.94rem,4vw,1.02rem)/1 var(--sans,"Noto Sans KR",sans-serif);
-  letter-spacing: .03em; cursor: pointer; opacity: 0; pointer-events: none;
+  letter-spacing: .03em; cursor: pointer; opacity: 0; pointer-events: none; visibility: hidden;
   box-shadow: 0 8px 30px rgba(0,0,0,.34);
-  transition: opacity .5s ease, transform .5s cubic-bezier(.22,.61,.36,1), background .25s ease;
+  transition: opacity .5s ease, transform .5s cubic-bezier(.22,.61,.36,1), background .25s ease, visibility 0s linear .5s;
 }
-.cine-open.show { opacity: 1; transform: translate(-50%,0); pointer-events: auto; }
+.cine-open.show { opacity: 1; transform: translate(-50%,0); pointer-events: auto; visibility: visible; transition: opacity .5s ease, transform .5s cubic-bezier(.22,.61,.36,1), background .25s ease; }
 .cine-open:hover { background: rgba(24,32,20,.62); }
 .cine-open:focus-visible { outline: 2px solid #fdf7ea; outline-offset: 3px; }
 .cine-open .ico { font-size: 1.05em; line-height: 0; }
