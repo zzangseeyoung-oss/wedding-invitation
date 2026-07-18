@@ -20,6 +20,15 @@
 /* 무 JS(또는 JS 조기 오류) 폴백: 외관 실사진이 항상 보이도록(.loaded는 JS 전용) */
 .cine-intro:not(.js-on) .cs-exterior .cine-img { opacity: 1; }
 
+/* 인트로 소비: 본문 모프 완료 후 인트로를 완전히 접어 위로 스크롤해도 재등장하지 않음 */
+.cine-intro.is-consumed {
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .cine-scene {
   position: absolute;
   inset: 0;
@@ -227,7 +236,6 @@
   transition: transform 1.05s cubic-bezier(.42,.12,.18,1);
   box-shadow: 1px 0 0 rgba(117,110,91,.18);
 }
-.cine-card-cover .cc-sprig { width: 30px; height: 30px; margin: 0 auto 4px; display: block; }
 .cine-card-cover .cc-kicker {
   margin: 0; color: var(--green, #3d6a54);
   font: 600 .62rem/1.2 var(--sans, sans-serif); letter-spacing: .32em; text-transform: uppercase;
