@@ -1,7 +1,9 @@
 /*
- * 시네마틱 인트로 — 고정 스테이지 기반 스크롤 시퀀스.
- * 기본(무 JS): 외관 한 화면 후 본문으로 이어진다.
- * JS 활성: 하나의 sticky 뷰포트에서 외관 → 실내 → 청첩장이 전환된다.
+ * 시네마틱 인트로 — 자동 재생(스크롤 비의존).
+ * 첫 진입 시 하나의 고정 전체 화면(100svh) 안에서 외관 → 실내 → 청첩장이 자동으로 재생되고,
+ * 마지막에 "초대장 펼치기" 버튼으로 아이보리 본문으로 이어진다.
+ * 무 JS / 모션 최소화: 외관 한 장면 + 본문 바로가기로 폴백.
+ * 기능 코드(RSVP/방명록/음악/지도)와 분리 — 이 파일 + cinematic-intro.js + .cine-intro 블록만 제거하면 기존 본문 복구.
  */
 
 .cine-intro {
@@ -10,54 +12,30 @@
   min-height: 620px;
   background: #11150f;
   isolation: isolate;
+  overflow: hidden;
 }
-
 .cine-intro + .hero { display: none; }
 
-/* JS가 실행되면 스크롤 진행 거리만 확보하고, 화면은 하나의 stage에 고정한다. */
-.invitation.cine-pinned { overflow: visible; }
-.cine-intro.js-on {
-  height: 360svh;
-  min-height: 2200px;
-}
-
-.cine-stage {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  min-height: 620px;
-  overflow: hidden;
-  background: #11150f;
-  isolation: isolate;
-}
-
-/* 무 JS 폴백: 첫 장면만 정상 흐름으로 보이고 나머지는 숨긴다. */
+/* 장면은 같은 좌표에 겹친다(세로 나열 아님). */
 .cine-scene {
-  position: relative;
-  height: 100svh;
-  min-height: 620px;
+  position: absolute;
+  inset: 0;
   display: grid;
   place-items: end center;
   overflow: hidden;
   isolation: isolate;
 }
+
+/* 무 JS 폴백: 첫 장면만 정상 표시, 나머지는 숨김(본문은 아래로 스크롤/바로가기). */
 .cine-intro:not(.js-on) .cine-scene:not(:first-of-type) { display: none; }
 
-/* JS 활성 시 모든 장면을 같은 좌표에 겹친다. */
+/* JS 활성: 모든 장면 겹치고 외관만 먼저 보임. */
 .cine-intro.js-on .cine-scene {
-  position: absolute;
-  inset: 0;
-  height: 100%;
-  min-height: 0;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  will-change: opacity, transform;
 }
-.cine-intro.js-on .cs-exterior {
-  opacity: 1;
-  visibility: visible;
-}
+.cine-intro.js-on .cs-exterior { opacity: 1; visibility: visible; }
 
 .cine-bg,
 .cine-img,
@@ -76,101 +54,133 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
+  transform-origin: center;
   opacity: 0;
   transition: opacity .7s ease;
   will-change: opacity, transform, filter;
 }
 .cine-img.loaded { opacity: 1; }
-.cs-ceremony .cine-img { object-position: center 68%; }
-.cs-invitation .cine-img { object-position: center 42%; }
+.cs-ceremony .cine-img { object-position: center 66%; }
+.cs-invitation .cine-img { object-position: center 44%; }
 
+/* ── 가독성 레이어 1: 하단 ~42%에만 명확한 다크 그라디언트(상단 건물/카드는 밝게 유지) ── */
 .cine-veil {
   z-index: 1;
-  background: linear-gradient(to top, rgba(16,20,15,.84) 0%, rgba(16,20,15,.55) 24%, rgba(16,20,15,.16) 58%, rgba(16,20,15,0) 84%);
   pointer-events: none;
+  background: linear-gradient(to top,
+    rgba(11,14,9,.94) 0%,
+    rgba(11,14,9,.82) 15%,
+    rgba(11,14,9,.52) 31%,
+    rgba(11,14,9,.18) 44%,
+    rgba(11,14,9,0) 60%);
 }
-.cs-ceremony .cine-veil {
-  background: linear-gradient(to top, rgba(15,18,14,.86) 0%, rgba(15,18,14,.59) 25%, rgba(15,18,14,.18) 61%, rgba(15,18,14,0) 88%);
-}
+/* 청첩장 카드 본체는 계속 보이도록 하단만 국소적으로 */
 .cs-invitation .cine-veil {
-  background: linear-gradient(to top, rgba(20,20,15,.82) 0%, rgba(20,20,15,.46) 27%, rgba(20,20,15,.08) 64%, rgba(20,20,15,0) 88%);
+  background: linear-gradient(to top,
+    rgba(13,13,9,.92) 0%,
+    rgba(13,13,9,.66) 14%,
+    rgba(13,13,9,.30) 29%,
+    rgba(13,13,9,.07) 43%,
+    rgba(13,13,9,0) 58%);
 }
 
+/* ── 카피 ── */
 .cine-copy {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   width: min(100%, 650px);
-  padding: 0 26px 11svh;
-  color: #fdfbf5;
+  padding: 0 26px 12svh;
+  color: #fdf7ea; /* 밝은 크림 */
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0,0,0,.62), 0 3px 28px rgba(0,0,0,.54);
+  text-shadow: 0 1px 3px rgba(0,0,0,.72), 0 3px 22px rgba(0,0,0,.6);
   will-change: opacity, transform;
 }
+/* ── 가독성 레이어 2: 텍스트 뒤에만 제한적 다크 플레이트(강한 radial, 가장자리 페더) ── */
 .cine-copy::before {
   content: "";
   position: absolute;
   z-index: -1;
   left: 50%;
-  top: 46%;
-  width: 122%;
-  height: 165%;
-  transform: translate(-50%,-50%);
-  background: radial-gradient(ellipse, rgba(12,16,12,.57), rgba(12,16,12,.24) 48%, transparent 75%);
+  top: 45%;
+  width: 130%;
+  height: 176%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse at center,
+    rgba(6,9,6,.74) 0%,
+    rgba(6,9,6,.5) 40%,
+    rgba(6,9,6,.16) 66%,
+    transparent 80%);
   pointer-events: none;
 }
-.cine-hero-copy { padding-bottom: 13svh; }
+.cine-hero-copy { padding-bottom: 14svh; }
+
 .cine-kicker,
 .cine-line {
   margin: 0 0 14px;
-  font: 500 clamp(.72rem,3vw,.86rem)/1 var(--english,"Cormorant Garamond",serif);
-  letter-spacing: .38em;
+  font: 600 clamp(.74rem, 3vw, .88rem)/1 var(--english, "Cormorant Garamond", serif);
+  letter-spacing: .4em;
   text-transform: uppercase;
-  opacity: .9;
+  color: #fdf7ea;
+  opacity: .96;
+  text-shadow: 0 1px 3px rgba(0,0,0,.7), 0 2px 14px rgba(0,0,0,.55);
 }
+/* 이름: 굵기·크기 강화 + 강한 글로우 */
 .cine-names {
   margin: 0;
-  font: 500 clamp(2.05rem,9vw,3.2rem)/1.18 var(--serif,"Noto Serif KR",serif);
+  font: 600 clamp(2.25rem, 9.6vw, 3.5rem)/1.16 var(--serif, "Noto Serif KR", serif);
   letter-spacing: .03em;
+  color: #fefaf0;
+  text-shadow: 0 1px 2px rgba(0,0,0,.86), 0 2px 12px rgba(0,0,0,.72), 0 0 34px rgba(0,0,0,.6);
 }
-.cine-names span { font-size: .7em; opacity: .8; margin: 0 .12em; }
+.cine-names span { font-size: .68em; opacity: .82; margin: 0 .12em; }
 .cine-date {
   margin: 18px 0 4px;
-  font: 400 clamp(.9rem,3.6vw,1.02rem)/1.5 var(--sans,"Noto Sans KR",sans-serif);
+  font: 500 clamp(.94rem, 3.7vw, 1.06rem)/1.5 var(--sans, "Noto Sans KR", sans-serif);
   letter-spacing: .05em;
+  color: #fdf7ea;
+  text-shadow: 0 1px 3px rgba(0,0,0,.78), 0 2px 14px rgba(0,0,0,.6);
 }
 .cine-place {
   margin: 0;
-  font: 400 clamp(.84rem,3.4vw,.96rem)/1.5 var(--sans,"Noto Sans KR",sans-serif);
-  opacity: .94;
+  font: 400 clamp(.86rem, 3.4vw, .98rem)/1.5 var(--sans, "Noto Sans KR", sans-serif);
+  color: #fdf7ea;
+  opacity: .96;
+  text-shadow: 0 1px 3px rgba(0,0,0,.78), 0 2px 14px rgba(0,0,0,.6);
 }
 .cine-title {
   margin: 0;
-  font: 500 clamp(1.48rem,6.4vw,2.1rem)/1.5 var(--serif,"Noto Serif KR",serif);
+  font: 600 clamp(1.5rem, 6.6vw, 2.15rem)/1.5 var(--serif, "Noto Serif KR", serif);
+  color: #fefaf0;
   word-break: keep-all;
+  text-shadow: 0 1px 2px rgba(0,0,0,.84), 0 2px 12px rgba(0,0,0,.7), 0 0 32px rgba(0,0,0,.55);
 }
 .cine-sub {
   margin: 13px 0 0;
-  font: 400 clamp(.88rem,3.6vw,1rem)/1.7 var(--sans,"Noto Sans KR",sans-serif);
-  opacity: .95;
+  font: 500 clamp(.9rem, 3.6vw, 1.02rem)/1.7 var(--sans, "Noto Sans KR", sans-serif);
+  color: #fdf7ea;
+  opacity: .97;
   word-break: keep-all;
+  text-shadow: 0 1px 3px rgba(0,0,0,.78), 0 2px 14px rgba(0,0,0,.6);
 }
 
+/* 본문 바로가기(항상 상단 유지) */
 .cine-skip {
   position: absolute;
   z-index: 20;
   top: max(14px, env(safe-area-inset-top));
   left: 14px;
   padding: 8px 14px;
-  border: 1px solid rgba(253,251,245,.34);
+  border: 1px solid rgba(253,247,234,.4);
   border-radius: 20px;
-  background: rgba(16,20,15,.45);
-  color: #fdfbf5;
+  background: rgba(14,18,12,.5);
+  color: #fdf7ea;
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
-  font: 500 .76rem/1 var(--sans,"Noto Sans KR",sans-serif);
+  font: 600 .78rem/1 var(--sans, "Noto Sans KR", sans-serif);
   text-decoration: none;
 }
 
+/* 스크롤 큐(무 JS 폴백에서만 의미) — 자동재생 시 숨김 */
 .cine-cue {
   position: absolute;
   z-index: 5;
@@ -180,66 +190,67 @@
   display: grid;
   justify-items: center;
   gap: 6px;
-  color: #fdfbf5;
-  font: 500 .72rem/1 var(--sans,"Noto Sans KR",sans-serif);
+  color: #fdf7ea;
+  font: 600 .74rem/1 var(--sans, "Noto Sans KR", sans-serif);
   letter-spacing: .2em;
-  text-shadow: 0 2px 12px rgba(0,0,0,.55);
-  transition: opacity .35s ease;
+  text-shadow: 0 2px 12px rgba(0,0,0,.6);
 }
 .cine-cue span { font-size: 1.08rem; animation: cine-bob 1.7s ease-in-out infinite; }
-.cine-intro.has-progress .cine-cue { opacity: 0; }
+.cine-intro.js-on .cine-cue { display: none; }
 @keyframes cine-bob { 50% { transform: translateY(6px); } }
 
-/* 진행 표시: 영화의 타임라인처럼 아주 얇게만 보인다. */
-.cine-progress {
+/* "초대장 펼치기" 버튼 — 자동재생 끝에 등장 */
+.cine-open {
   position: absolute;
-  z-index: 18;
+  z-index: 12;
   left: 50%;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  width: min(150px, 36vw);
-  height: 2px;
-  transform: translateX(-50%);
-  background: rgba(255,255,255,.24);
-  overflow: hidden;
-  opacity: 0;
-  transition: opacity .3s ease;
-}
-.cine-intro.has-progress .cine-progress { opacity: .8; }
-.cine-progress > i {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: #fffaf0;
-  transform: scaleX(0);
-  transform-origin: left;
-}
-
-/* 마지막 프레임이 본문 종이에 녹아들도록 하단을 아이보리로 페이드한다. */
-.cine-paper-fade {
-  position: absolute;
-  z-index: 9;
-  inset: auto 0 0;
-  height: 26svh;
-  background: linear-gradient(to bottom, transparent, rgba(248,240,223,.18) 38%, #f8f0df 100%);
+  bottom: max(8svh, calc(env(safe-area-inset-bottom) + 22px));
+  transform: translate(-50%, 14px);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 30px;
+  border: 1px solid rgba(253,247,234,.55);
+  border-radius: 999px;
+  background: rgba(18,24,16,.52);
+  color: #fdf7ea;
+  backdrop-filter: blur(9px);
+  -webkit-backdrop-filter: blur(9px);
+  font: 600 clamp(.94rem, 4vw, 1.02rem)/1 var(--sans, "Noto Sans KR", sans-serif);
+  letter-spacing: .03em;
+  cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  will-change: opacity;
+  box-shadow: 0 8px 30px rgba(0,0,0,.34);
+  transition: opacity .55s ease, transform .55s cubic-bezier(.22,.61,.36,1), background .25s ease;
 }
+.cine-open.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.cine-open:hover { background: rgba(24,32,20,.62); }
+.cine-open:focus-visible { outline: 2px solid #fdf7ea; outline-offset: 3px; }
+.cine-open .ico { font-size: 1.05em; line-height: 0; }
+
+/* 인트로 → 본문 전환용 아이보리 디졸브 커버 */
+.cine-cover {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #f8f0df;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s ease;
+}
+.cine-cover.on { opacity: 1; }
 
 @media (min-width: 700px) {
-  .cine-intro.js-on { height: 330svh; }
-  .cine-copy { padding-bottom: 10svh; }
+  .cine-copy { padding-bottom: 11svh; }
+  .cine-open { bottom: max(7svh, calc(env(safe-area-inset-bottom) + 22px)); }
 }
 
+/* 모션 최소화: 자동재생/줌/페이드 정지 — 외관 정지 화면 + 버튼 + 본문 접근 */
 @media (prefers-reduced-motion: reduce) {
-  .cine-intro,
-  .cine-intro.js-on { height: 100svh !important; min-height: 620px; }
-  .cine-stage { position: relative; }
-  .cine-intro.js-on .cine-scene { display: none; }
-  .cine-intro.js-on .cs-exterior { display: grid; opacity: 1 !important; visibility: visible !important; }
   .cine-img { transform: none !important; filter: none !important; animation: none !important; }
-  .cine-copy { opacity: 1 !important; transform: none !important; }
+  .cine-intro.js-on .cine-copy { opacity: 1 !important; transform: none !important; }
+  .cine-open { transition: opacity .001s linear; }
+  .cine-cover { transition: opacity .001s linear; }
   .cine-cue span { animation: none; }
-  .cine-progress,
-  .cine-paper-fade { display: none; }
 }

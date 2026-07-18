@@ -1,6 +1,8 @@
 /*
- * 시네마틱 인트로 — pinned scroll sequence.
- * 기능 코드와 분리. JS가 실패하거나 모션 최소화가 켜지면 첫 장면 후 본문으로 폴백한다.
+ * 시네마틱 인트로 — 시간 기반 자동 재생(스크롤 비의존).
+ * 타임라인(초): 0~2.5 외관 접근 → 2.2~4.8 실내 크로스페이드/전진 → 4.5~7.2 청첩장 줌인 → 7.2~ "초대장 펼치기" 버튼.
+ * 버튼 클릭: 아이보리로 부드럽게 디졸브 → 모시는 글로 이동. 스크롤은 막지 않고, 임계값 넘으면 인트로 즉시 완료.
+ * 무 JS / prefers-reduced-motion: 외관 정지 화면 + 본문 접근으로 폴백.
  */
 (function () {
   "use strict";
@@ -8,142 +10,206 @@
   const intro = document.querySelector("[data-cine]");
   if (!intro) return;
 
-  const invitation = intro.closest(".invitation");
   const reduce =
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   const scenes = [...intro.querySelectorAll(".cine-scene")];
-  const images = scenes.map((scene) => scene.querySelector(".cine-img"));
-  const copies = scenes.map((scene) => scene.querySelector(".cine-copy"));
-
   if (!scenes.length) return;
+  const imgs = scenes.map((s) => s.querySelector(".cine-img"));
+  const copies = scenes.map((s) => s.querySelector(".cine-copy"));
 
-  // 이미지 로드 상태. 실패해도 LQIP 배경과 본문은 남는다.
-  images.forEach((img) => {
+  // 이미지 로드 상태(실패해도 LQIP 배경/본문 유지)
+  imgs.forEach((img) => {
     if (!img) return;
     if (img.complete && img.naturalWidth) img.classList.add("loaded");
-    else img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
-    img.addEventListener("error", () => img.classList.add("loaded"), { once: true });
+    else {
+      img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
+      img.addEventListener("error", () => img.classList.add("loaded"), { once: true });
+    }
   });
 
   intro.classList.add("js-on");
-  if (invitation) invitation.classList.add("cine-pinned");
 
-  // 기존 HTML을 건드리지 않고 런타임에 하나의 고정 스테이지로 묶는다.
-  const stage = document.createElement("div");
-  stage.className = "cine-stage";
-  const skip = intro.querySelector(".cine-skip");
-  if (skip) stage.appendChild(skip);
-  scenes.forEach((scene) => stage.appendChild(scene));
+  // 자동재생 끝 "초대장 펼치기" 버튼
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "cine-open";
+  btn.innerHTML = '<span class="ico" aria-hidden="true">✦</span><span>초대장 펼치기</span>';
+  intro.appendChild(btn);
 
-  const progress = document.createElement("div");
-  progress.className = "cine-progress";
-  progress.setAttribute("aria-hidden", "true");
-  progress.innerHTML = "<i></i>";
-  stage.appendChild(progress);
+  // 아이보리 디졸브 커버
+  const cover = document.createElement("div");
+  cover.className = "cine-cover";
+  cover.setAttribute("aria-hidden", "true");
+  document.body.appendChild(cover);
 
-  const paperFade = document.createElement("div");
-  paperFade.className = "cine-paper-fade";
-  paperFade.setAttribute("aria-hidden", "true");
-  stage.appendChild(paperFade);
-  intro.appendChild(stage);
+  const target = document.querySelector("#invitation-title");
 
-  if (reduce) return;
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const range = (v, a, b) => clamp((v - a) / (b - a));
+  const smooth = (v) => v * v * (3 - 2 * v);
+  const mix = (a, b, t) => a + (b - a) * t;
 
-  const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
-  const range = (value, start, end) => clamp((value - start) / (end - start));
-  const smooth = (value) => value * value * (3 - 2 * value);
-  const mix = (from, to, amount) => from + (to - from) * amount;
-
-  function setScene(scene, opacity, visible) {
+  function setScene(scene, opacity) {
+    const vis = opacity > 0.002;
     scene.style.opacity = opacity.toFixed(4);
-    scene.style.visibility = visible ? "visible" : "hidden";
-    scene.style.zIndex = visible ? String(Math.round(opacity * 10) + 1) : "0";
+    scene.style.visibility = vis ? "visible" : "hidden";
+    scene.style.zIndex = vis ? String(Math.round(opacity * 10) + 1) : "0";
   }
 
-  function render(rawProgress) {
-    const p = clamp(rawProgress);
-
-    // 외관: 첫 1/3 동안 입구 쪽으로 천천히 전진한 뒤 실내와 겹쳐 사라짐.
-    const exteriorOut = smooth(range(p, 0.24, 0.42));
-    const exteriorOpacity = 1 - exteriorOut;
-    setScene(scenes[0], exteriorOpacity, exteriorOpacity > 0.002);
-    if (images[0]) {
-      const z = mix(1.01, 1.145, smooth(range(p, 0, 0.42)));
-      const y = mix(0, -1.8, range(p, 0, 0.42));
-      images[0].style.transform = `scale(${z}) translate3d(0, ${y}%, 0)`;
-      images[0].style.filter = `brightness(${mix(1, 0.88, exteriorOut)})`;
+  // 시간(초) → 장면 상태
+  function render(t) {
+    // 외관: 입구 쪽으로 서서히 접근하다 실내와 겹치며 사라짐
+    const eOut = smooth(range(t, 2.2, 3.0));
+    setScene(scenes[0], 1 - eOut);
+    if (imgs[0]) {
+      const z = mix(1.03, 1.17, smooth(range(t, 0, 3.0)));
+      const y = mix(0, -2.0, range(t, 0, 3.0));
+      imgs[0].style.transform = `scale(${z}) translate3d(0, ${y}%, 0)`;
+      imgs[0].style.filter = `brightness(${mix(1, 0.9, eOut)})`;
     }
     if (copies[0]) {
-      const cp = smooth(range(p, 0.17, 0.34));
-      copies[0].style.opacity = (1 - cp).toFixed(4);
-      copies[0].style.transform = `translate3d(0, ${mix(0, -18, cp)}px, 0)`;
+      const ci = smooth(range(t, 0.5, 1.4));
+      const co = smooth(range(t, 2.0, 2.7));
+      copies[0].style.opacity = (ci * (1 - co)).toFixed(4);
+      copies[0].style.transform = `translate3d(0, ${mix(14, -14, ci)}px, 0)`;
     }
 
-    // 실내: 외관 뒤에서 나타나 천천히 아일 안쪽으로 전진, 청첩장 장면과 교차.
-    const interiorIn = smooth(range(p, 0.25, 0.43));
-    const interiorOut = smooth(range(p, 0.61, 0.78));
-    const interiorOpacity = interiorIn * (1 - interiorOut);
-    setScene(scenes[1], interiorOpacity, interiorOpacity > 0.002);
-    if (images[1]) {
-      const z = mix(1.08, 1.18, smooth(range(p, 0.28, 0.76)));
-      const y = mix(1.2, -2.4, range(p, 0.28, 0.76));
-      images[1].style.transform = `scale(${z}) translate3d(0, ${y}%, 0)`;
-      images[1].style.filter = `brightness(${mix(0.9, 1.02, interiorIn)})`;
+    // 실내: 외관 뒤에서 나타나 아일 안쪽으로 전진, 청첩장과 교차
+    const iIn = smooth(range(t, 2.2, 3.2));
+    const iOut = smooth(range(t, 4.5, 5.3));
+    setScene(scenes[1], iIn * (1 - iOut));
+    if (imgs[1]) {
+      const z = mix(1.06, 1.18, smooth(range(t, 2.2, 5.3)));
+      const y = mix(1.5, -2.5, range(t, 2.2, 5.3));
+      imgs[1].style.transform = `scale(${z}) translate3d(0, ${y}%, 0)`;
+      imgs[1].style.filter = `brightness(${mix(0.92, 1.02, iIn)})`;
     }
     if (copies[1]) {
-      const copyIn = smooth(range(p, 0.34, 0.47));
-      const copyOut = smooth(range(p, 0.57, 0.69));
-      const opacity = copyIn * (1 - copyOut);
-      copies[1].style.opacity = opacity.toFixed(4);
-      copies[1].style.transform = `translate3d(0, ${mix(16, -12, copyIn)}px, 0)`;
+      const ci = smooth(range(t, 3.0, 3.9));
+      const co = smooth(range(t, 4.2, 4.9));
+      copies[1].style.opacity = (ci * (1 - co)).toFixed(4);
+      copies[1].style.transform = `translate3d(0, ${mix(16, -12, ci)}px, 0)`;
     }
 
-    // 청첩장: 식탁 장면이 나타나고 카드 쪽으로 줌인. 마지막은 본문 종이에 녹아든다.
-    const invitationIn = smooth(range(p, 0.62, 0.79));
-    const invitationOpacity = invitationIn;
-    setScene(scenes[2], invitationOpacity, invitationOpacity > 0.002);
-    if (images[2]) {
-      const zoomProgress = smooth(range(p, 0.65, 1));
-      const z = mix(1.055, 1.26, zoomProgress);
-      const x = mix(0, -1.2, zoomProgress);
-      const y = mix(0.8, -2.6, zoomProgress);
-      images[2].style.transform = `scale(${z}) translate3d(${x}%, ${y}%, 0)`;
-      images[2].style.filter = `brightness(${mix(0.92, 1.03, invitationIn)})`;
+    // 청첩장: 식탁 위 카드가 나타나 줌인, 카피는 잠깐 보였다 버튼에 자리를 내줌
+    const vIn = smooth(range(t, 4.5, 5.5));
+    setScene(scenes[2], vIn);
+    if (imgs[2]) {
+      const zp = smooth(range(t, 4.7, 7.2));
+      const z = mix(1.05, 1.28, zp);
+      const x = mix(0, -1.2, zp);
+      const y = mix(0.8, -2.6, zp);
+      imgs[2].style.transform = `scale(${z}) translate3d(${x}%, ${y}%, 0)`;
+      imgs[2].style.filter = `brightness(${mix(0.92, 1.03, vIn)})`;
     }
     if (copies[2]) {
-      const copyIn = smooth(range(p, 0.72, 0.84));
-      const copyOut = smooth(range(p, 0.93, 1));
-      const opacity = copyIn * (1 - copyOut);
-      copies[2].style.opacity = opacity.toFixed(4);
-      copies[2].style.transform = `translate3d(0, ${mix(18, -10, copyIn)}px, 0)`;
+      const ci = smooth(range(t, 5.5, 6.3));
+      const co = smooth(range(t, 6.6, 7.05));
+      copies[2].style.opacity = (ci * (1 - co)).toFixed(4);
+      copies[2].style.transform = `translate3d(0, ${mix(18, -10, ci)}px, 0)`;
     }
-
-    const cue = stage.querySelector(".cine-cue");
-    intro.classList.toggle("has-progress", p > 0.018);
-    if (cue) cue.style.visibility = p < 0.2 ? "visible" : "hidden";
-    const bar = progress.querySelector("i");
-    if (bar) bar.style.transform = `scaleX(${p.toFixed(4)})`;
-    paperFade.style.opacity = smooth(range(p, 0.91, 1)).toFixed(4);
   }
 
-  let ticking = false;
-  function update() {
-    ticking = false;
-    const rect = intro.getBoundingClientRect();
-    const scrollable = Math.max(1, intro.offsetHeight - window.innerHeight);
-    const p = clamp(-rect.top / scrollable);
-    render(p);
+  const END = 7.3; // 초
+  let done = false;
+  let rafId = 0;
+  let startTs = 0;
+  let buttonShown = false;
+
+  function showButton() {
+    if (buttonShown) return;
+    buttonShown = true;
+    btn.classList.add("show");
   }
 
-  function requestUpdate() {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(update);
+  // 애니 종료 후 GPU 승격 해제(모바일 합성/메모리 절약)
+  function releaseWillChange() {
+    imgs.forEach((im) => { if (im) im.style.willChange = "auto"; });
+    copies.forEach((c) => { if (c) c.style.willChange = "auto"; });
   }
 
-  window.addEventListener("scroll", requestUpdate, { passive: true });
-  window.addEventListener("resize", requestUpdate, { passive: true });
-  window.addEventListener("orientationchange", requestUpdate, { passive: true });
-  update();
+  function finishAtEnd() {
+    render(END);
+    showButton();
+    releaseWillChange();
+  }
+
+  function loop(now) {
+    if (!startTs) startTs = now;
+    const t = (now - startTs) / 1000;
+    render(Math.min(t, END));
+    if (t >= 7.2) showButton();
+    if (t < END && !done) {
+      rafId = requestAnimationFrame(loop);
+    } else if (!done) {
+      finishAtEnd();
+    }
+  }
+
+  // 인트로 → 본문: 아이보리 디졸브 후 모시는 글로 이동
+  function goToBody(animated) {
+    if (animated) {
+      cover.classList.add("on");
+      window.setTimeout(() => {
+        if (target) target.scrollIntoView({ block: "start" });
+        requestAnimationFrame(() => cover.classList.remove("on"));
+      }, 480);
+    } else if (target) {
+      target.scrollIntoView({ block: "start" });
+    }
+  }
+
+  function dismiss() {
+    if (done) { goToBody(!reduce); return; }
+    done = true;
+    if (rafId) cancelAnimationFrame(rafId);
+    render(END);
+    showButton();
+    releaseWillChange();
+    goToBody(!reduce);
+  }
+
+  btn.addEventListener("click", dismiss);
+
+  // 스크롤을 막지 않되, 임계값 이상이면 인트로를 즉시 완료 처리(강제 이동은 하지 않음)
+  let scrollHandled = false;
+  function onScroll() {
+    if (scrollHandled) return;
+    if (window.scrollY > 56) {
+      scrollHandled = true;
+      window.removeEventListener("scroll", onScroll);
+      if (reduce || done) return;
+      done = true;
+      if (rafId) cancelAnimationFrame(rafId);
+      render(END);
+      showButton();
+      releaseWillChange();
+    }
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  // ── 시작 ──
+  if (reduce) {
+    // 정지: 외관 + 버튼 즉시, 애니 없음
+    scenes.forEach((s, i) => setScene(s, i === 0 ? 1 : 0));
+    if (imgs[0]) { imgs[0].style.transform = "none"; imgs[0].style.filter = "none"; }
+    releaseWillChange();
+    showButton();
+    return;
+  }
+
+  let started = false;
+  function start() {
+    if (started) return;
+    started = true;
+    rafId = requestAnimationFrame(loop);
+  }
+  // 외관 이미지가 준비되면 시작(최대 1.2s 후 폴백 시작)
+  if (imgs[0] && imgs[0].complete && imgs[0].naturalWidth) start();
+  else {
+    if (imgs[0]) imgs[0].addEventListener("load", start, { once: true });
+    window.setTimeout(start, 1200);
+  }
 })();
