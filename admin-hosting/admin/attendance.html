@@ -45,14 +45,42 @@
       .spin { width: 26px; height: 26px; border: 3px solid #ddd; border-top-color: var(--green); border-radius: 50%; margin: 6px auto 14px; animation: sp 0.9s linear infinite; }
       @keyframes sp { to { transform: rotate(360deg); } }
 
-      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 12px 0 16px; }
-      .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; }
-      .stat .label { color: var(--muted); font-size: 0.76rem; }
-      .stat .value { font-size: 1.5rem; font-weight: 700; margin-top: 3px; }
-      .stat.accent .value { color: var(--green); }
-      .stat.blue .value { color: var(--blue); }
-      .stat.warn .value { color: var(--warn); }
-      .basis { color: var(--muted); font-size: 0.74rem; margin: -6px 0 14px; }
+      /* 요약: '명(사람 수)'과 '건(응답 수)'은 단위가 다르므로 영역·글자크기·단위표기로 분리한다.
+         동일한 카드 7개를 나열하면 3건과 4명이 서로 어긋난 수치처럼 보인다. */
+      .summary { display: grid; gap: 10px; margin: 12px 0 0; }
+      .headline { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+      .headline .cap { color: var(--muted); font-size: 0.78rem; font-weight: 600; }
+      .headline .big { display: flex; align-items: baseline; gap: 3px; margin-top: 2px; }
+      .headline .big b { font-size: 2.6rem; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; color: var(--green); }
+      .headline .big span { font-size: 1.05rem; font-weight: 700; color: var(--green); }
+      .recon { color: var(--muted); font-size: 0.8rem; margin-top: 7px; line-height: 1.55; }
+      .recon b { color: var(--ink); font-weight: 700; }
+      /* 넓은 화면에서는 큰 숫자와 측별 내역을 좌우로 나눠 빈 공간을 줄인다 */
+      @media (min-width: 760px) {
+        .headline { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(260px, 400px); gap: 22px; align-items: center; }
+        .headline .hl-side { margin-top: 0; }
+        .headline .hl-side .sides { margin-top: 0; }
+      }
+      .sides { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+      .side-box { flex: 1 1 130px; border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+      .side-box .k { font-size: 0.76rem; color: var(--muted); }
+      .side-box .v { font-size: 1.15rem; font-weight: 700; margin-top: 1px; }
+      .side-box.g .v { color: var(--blue); }
+      .side-box.b .v { color: #9a4a6a; }
+      .bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: #eef0f3; margin-top: 10px; }
+      .bar i { display: block; height: 100%; }
+      .bar .fg { background: var(--blue); }
+      .bar .fb { background: #b8829a; }
+      .subrow { display: flex; gap: 8px; flex-wrap: wrap; }
+      .chipstat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 9px 13px; display: flex; align-items: baseline; gap: 7px; }
+      .chipstat .k { color: var(--muted); font-size: 0.78rem; }
+      .chipstat .v { font-size: 1.02rem; font-weight: 700; }
+      .chipstat.att .v { color: var(--green); }
+      .chipstat.dec .v { color: var(--red); }
+      .chipstat.warn .v { color: var(--warn); }
+      .chipstat.zero { opacity: 0.5; }
+      .basis { color: var(--muted); font-size: 0.74rem; margin: 10px 0 14px; line-height: 1.65; }
+      .basis b { color: var(--ink); }
 
       .filters { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: grid; gap: 10px; }
       .filters .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
@@ -147,8 +175,8 @@
         </div>
       </div>
       <p class="notice">이 화면에는 하객의 이름과 연락처가 포함됩니다. 공용 PC·화면 캡처·공유에 주의해 주세요.</p>
-      <div class="cards" data-cards></div>
-      <p class="basis">참석·불참·예상 인원은 <b>최신 응답 기준</b>(같은 연락처는 가장 최근 응답 1건)으로 집계합니다. ‘전체 응답 건수’만 원본 전체 기준입니다.</p>
+      <div class="summary" data-summary></div>
+      <p class="basis"><b>건</b>은 제출된 응답 수, <b>명</b>은 실제 오시는 사람 수입니다. 한 응답에 동반 인원이 포함될 수 있어 두 숫자는 다를 수 있습니다.<br />참석·불참·인원은 <b>최신 응답 기준</b>(같은 연락처는 가장 최근 응답 1건)이며, ‘전체 응답’만 원본 전체 기준입니다.</p>
       <div class="filters">
         <div class="row">
           <select data-f-status><option value="">참석 여부 전체</option><option value="attending">참석</option><option value="not_attending">불참</option></select>
@@ -264,20 +292,45 @@
         }
       }
 
+      const sumParty = (a) => a.reduce((s, r) => s + (Number(r.party) || 0), 0);
+
       function renderStats() {
         const latest = rows.filter((r) => r.isLatest);
         const att = latest.filter((r) => r.status === "attending");
-        const sum = (a) => a.reduce((s, r) => s + (Number(r.party) || 0), 0);
-        const cards = [
-          { label: "전체 응답 건수", value: rows.length },
-          { label: "참석 응답", value: att.length, cls: "accent" },
-          { label: "불참 응답", value: latest.filter((r) => r.status === "not_attending").length },
-          { label: "예상 총 참석 인원", value: sum(att), cls: "accent" },
-          { label: "신랑측 예상 인원", value: sum(att.filter((r) => r.side === "groom")), cls: "blue" },
-          { label: "신부측 예상 인원", value: sum(att.filter((r) => r.side === "bride")), cls: "blue" },
-          { label: "중복 가능 응답", value: rows.filter((r) => r.dupGroupSize > 1).length, cls: "warn" },
-        ];
-        $("[data-cards]").innerHTML = cards.map((c) => `<div class="stat ${c.cls || ""}"><div class="label">${c.label}</div><div class="value">${c.value}</div></div>`).join("");
+        const dec = latest.filter((r) => r.status === "not_attending");
+        const head = sumParty(att);
+        const gHead = sumParty(att.filter((r) => r.side === "groom"));
+        const bHead = sumParty(att.filter((r) => r.side === "bride"));
+        const dup = rows.filter((r) => r.dupGroupSize > 1).length;
+        const gPct = head ? Math.round((gHead / head) * 100) : 0;
+        // 건수와 인원이 왜 다른지를 화면에서 바로 설명한다(응답 3건 = 4명 같은 경우).
+        const recon = head
+          ? `참석 응답 <b>${att.length}건</b>에서 실제로 오시는 분은 <b>${head}명</b>입니다.` +
+            (head !== att.length ? " 한 응답에 동반 인원이 포함되어 건수와 인원이 다릅니다." : "")
+          : "아직 참석 응답이 없습니다.";
+        const chip = (k, v, unit, cls) =>
+          `<div class="chipstat ${cls || ""}${v === 0 ? " zero" : ""}"><span class="k">${k}</span><span class="v">${v}${unit}</span></div>`;
+        $("[data-summary]").innerHTML = `
+          <div class="headline">
+            <div class="hl-main">
+              <div class="cap">예상 참석 인원 · 식사와 좌석은 이 숫자로 준비하세요</div>
+              <div class="big"><b>${head}</b><span>명</span></div>
+              <div class="recon">${recon}</div>
+            </div>
+            <div class="hl-side">
+              <div class="sides">
+                <div class="side-box g"><div class="k">신랑측</div><div class="v">${gHead}명</div></div>
+                <div class="side-box b"><div class="k">신부측</div><div class="v">${bHead}명</div></div>
+              </div>
+              ${head ? `<div class="bar"><i class="fg" style="width:${gPct}%"></i><i class="fb" style="width:${100 - gPct}%"></i></div>` : ""}
+            </div>
+          </div>
+          <div class="subrow">
+            ${chip("참석 응답", att.length, "건", "att")}
+            ${chip("불참 응답", dec.length, "건", "dec")}
+            ${chip("전체 응답", rows.length, "건")}
+            ${chip("중복 가능", dup, "건", "warn")}
+          </div>`;
       }
 
       function currentFilterRows() {
@@ -303,7 +356,9 @@
 
       function applyFilters() {
         const list = currentFilterRows();
-        $("[data-count]").textContent = `표시 ${list.length}건 / 전체 ${rows.length}건`;
+        const shownAtt = list.filter((r) => r.status === "attending");
+        $("[data-count]").textContent =
+          `표시 ${list.length}건 (참석 ${shownAtt.length}건 · ${sumParty(shownAtt)}명) · 전체 ${rows.length}건`;
         $("[data-empty]").classList.toggle("hidden", list.length !== 0);
         $("[data-tbody]").innerHTML = list.map((r) => `<tr class="${r.isLatest ? "" : "stale"}">
           <td>${esc(fmtDate(r.created))}</td><td>${statusBadge(r)}</td><td>${sideBadge(r)}</td><td>${esc(r.name)}</td>
@@ -340,7 +395,7 @@
 
       function clearSensitive() {
         rows = [];
-        $("[data-tbody]").innerHTML = ""; $("[data-mobile]").innerHTML = ""; $("[data-cards]").innerHTML = "";
+        $("[data-tbody]").innerHTML = ""; $("[data-mobile]").innerHTML = ""; $("[data-summary]").innerHTML = "";
         ["[data-f-name]", "[data-f-phone]"].forEach((s) => { const el = $(s); if (el) el.value = ""; });
         if (csvUrl) { URL.revokeObjectURL(csvUrl); csvUrl = null; }
       }
