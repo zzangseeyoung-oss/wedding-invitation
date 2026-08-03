@@ -89,11 +89,14 @@
       .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 0.83rem; }
 
       .table-wrap { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: auto; }
-      table { width: 100%; border-collapse: collapse; min-width: 900px; }
-      th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.84rem; }
+      table { width: 100%; border-collapse: collapse; min-width: 980px; }
+      th, td { padding: 10px 10px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 0.84rem; }
+      td.attcol { min-width: 152px; }
+      td.msgcol { min-width: 148px; }
       th { position: sticky; top: 0; background: #eef0f3; z-index: 1; font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
       tr.stale td { background: #fbfbfc; color: var(--muted); }
-      .badge { display: inline-block; padding: 1px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+      .badge { display: inline-block; padding: 1px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 600; white-space: nowrap; }
+      td.nw { white-space: nowrap; }
       .badge.att { background: #e7f0e9; color: var(--green); }
       .badge.dec { background: #f3e9e9; color: var(--red); }
       .badge.groom { background: #e9eef5; color: var(--blue); }
@@ -101,6 +104,13 @@
       .badge.latest { background: #eef4ec; color: var(--green-dark); }
       .badge.old { background: #eee; color: var(--muted); }
       .badge.dup { background: #f7efe3; color: var(--warn); }
+      .badge.chk { background: #fdf0dd; color: #8a4e12; border: 1px solid #edd3ac; }
+      .warnnote { color: #8a4e12; font-size: 0.76rem; white-space: nowrap; }
+      tr.needs-check td { background: #fffaf2; }
+      .rc.needs-check { border-color: #edd3ac; background: #fffaf2; }
+      .alert { background: #fdf6ea; border: 1px solid #edd3ac; color: #6d4514; border-radius: 12px; padding: 11px 14px; font-size: 0.83rem; line-height: 1.6; }
+      .alert b { color: #5a3a10; }
+      .headline .big .range { font-size: 1.05rem; font-weight: 700; color: var(--warn); font-style: normal; margin-left: 8px; }
       .phone-cell { white-space: nowrap; }
       .phone-cell a { text-decoration: none; font-weight: 600; }
       .phone-cell .copy { margin-left: 6px; color: var(--muted); cursor: pointer; background: none; border: 0; font-size: 0.76rem; }
@@ -280,6 +290,7 @@
           const raw = snap.docs.map((d) => { const x = d.data(); const ca = x.created_at && x.created_at.toDate ? x.created_at.toDate() : null;
             return { id: d.id, status: x.status, side: x.side, name: x.respondent_name || "", phone: x.phone || "", party: x.party_size || 0,
               attendees: Array.isArray(x.attendees) ? x.attendees.map((a) => a && a.name).filter(Boolean) : [], message: x.message || "", created: ca }; });
+          raw.forEach(flagRow);
           const groups = {}; raw.forEach((r) => { const k = normPhone(r.phone) || ("__" + r.id); (groups[k] ||= []).push(r); });
           Object.values(groups).forEach((g) => { g.sort((a, b) => (b.created?.getTime() || 0) - (a.created?.getTime() || 0));
             g.forEach((r, i) => { r.isLatest = i === 0; r.dupGroupSize = g.length; r.dupKey = normPhone(r.phone) || r.id; }); });
@@ -293,6 +304,23 @@
       }
 
       const sumParty = (a) => a.reduce((s, r) => s + (Number(r.party) || 0), 0);
+
+      // 폼은 '총 참석 인원(본인 포함)' + '참석자 이름(인원 수만큼)'을 받는다.
+      // 그런데 대표자가 동반자 이름만 적는 경우가 있어(예: 인원 2 · 이름 = 다른 사람 2명),
+      // 그대로 합산하면 대표자 본인이 빠진 수가 된다. 조용히 넘기지 않고 표시한다.
+      const squash = (s) => String(s || "").replace(/\s+/g, "");
+      function nameListed(list, name) {
+        const n = squash(name);
+        if (!n) return true; // 대표자 이름이 없으면 판단하지 않는다
+        return list.some((a) => { const x = squash(a); return x === n || x.includes(n) || n.includes(x); });
+      }
+      function flagRow(r) {
+        const att = r.status === "attending", n = r.attendees.length, p = Number(r.party) || 0;
+        r.selfMissing = att && n > 0 && !nameListed(r.attendees, r.name); // 명단에 대표자 없음
+        r.countMismatch = att && n > 0 && n !== p;                        // 이름 수 ≠ 인원
+        r.needsCheck = !!(r.selfMissing || r.countMismatch);
+        return r;
+      }
 
       function renderStats() {
         const latest = rows.filter((r) => r.isLatest);
@@ -310,11 +338,31 @@
           : "아직 참석 응답이 없습니다.";
         const chip = (k, v, unit, cls) =>
           `<div class="chipstat ${cls || ""}${v === 0 ? " zero" : ""}"><span class="k">${k}</span><span class="v">${v}${unit}</span></div>`;
+
+        // 입력이 엇갈린 응답을 드러낸다. 숫자를 임의로 바꾸지 않고, 확인이 필요한 대상과
+        // 대표자를 더했을 때의 인원을 함께 보여 준다.
+        const miss = att.filter((r) => r.selfMissing);
+        const mism = att.filter((r) => r.countMismatch && !r.selfMissing);
+        const maxHead = head + miss.length;
+        let alert = "";
+        if (miss.length || mism.length) {
+          const parts = [];
+          if (miss.length)
+            parts.push(
+              `<b>${miss.length}건</b>은 참석자 이름에 <b>대표자 본인</b>이 없습니다` +
+              `(${miss.map((r) => esc(r.name)).join(", ")}).` +
+              ` 이분들도 오신다면 총 <b>${maxHead}명</b>이 됩니다.`
+            );
+          if (mism.length)
+            parts.push(`<b>${mism.length}건</b>은 적어 주신 이름 수와 인원이 다릅니다(${mism.map((r) => esc(r.name)).join(", ")}).`);
+          alert = `<div class="alert"><b>확인 필요</b> · ${parts.join(" ")} 아래 표에서 <b>확인 필요</b> 표시를 눌러 직접 여쭤보세요.</div>`;
+        }
+
         $("[data-summary]").innerHTML = `
           <div class="headline">
             <div class="hl-main">
               <div class="cap">예상 참석 인원 · 식사와 좌석은 이 숫자로 준비하세요</div>
-              <div class="big"><b>${head}</b><span>명</span></div>
+              <div class="big"><b>${head}</b><span>명</span>${miss.length ? `<em class="range">~ ${maxHead}명</em>` : ""}</div>
               <div class="recon">${recon}</div>
             </div>
             <div class="hl-side">
@@ -325,10 +373,12 @@
               ${head ? `<div class="bar"><i class="fg" style="width:${gPct}%"></i><i class="fb" style="width:${100 - gPct}%"></i></div>` : ""}
             </div>
           </div>
+          ${alert}
           <div class="subrow">
             ${chip("참석 응답", att.length, "건", "att")}
             ${chip("불참 응답", dec.length, "건", "dec")}
             ${chip("전체 응답", rows.length, "건")}
+            ${chip("확인 필요", miss.length + mism.length, "건", "warn")}
             ${chip("중복 가능", dup, "건", "warn")}
           </div>`;
       }
@@ -348,11 +398,27 @@
       }
       const statusBadge = (r) => r.status === "attending" ? '<span class="badge att">참석</span>' : '<span class="badge dec">불참</span>';
       const sideBadge = (r) => r.side === "groom" ? '<span class="badge groom">신랑측</span>' : '<span class="badge bride">신부측</span>';
-      const stateBadges = (r) => (r.isLatest ? '<span class="badge latest">최신</span>' : '<span class="badge old">이전</span>') + (r.dupGroupSize > 1 ? ' <span class="badge dup">중복 가능</span>' : "");
+      const checkBadge = (r) =>
+        r.selfMissing ? ` <span class="badge chk" title="참석자 이름에 대표자 본인이 없습니다. 대표자도 오시면 인원이 1명 늘어납니다.">대표자 미포함</span>`
+        : r.countMismatch ? ` <span class="badge chk" title="적어 주신 이름 수와 인원이 다릅니다.">인원≠이름수</span>` : "";
+      const stateBadges = (r) => (r.isLatest ? '<span class="badge latest">최신</span>' : '<span class="badge old">이전</span>') + (r.dupGroupSize > 1 ? ' <span class="badge dup">중복 가능</span>' : "") + checkBadge(r);
       function phoneCell(r) { const full = fmtPhone(r.phone); const digits = normPhone(r.phone);
         return `<span class="phone-cell"><a href="tel:${esc(digits)}">${esc(full)}</a> <button class="copy" data-copy-phone="${esc(digits)}">복사</button></span>`; }
       function msgCell(r) { if (!r.message) return "-"; if (r.message.length <= 24) return `<span>${esc(r.message)}</span>`;
         return `<span class="msg"><span class="short">${esc(r.message.slice(0,24))}… <button class="link" data-toggle-msg>더보기</button></span><span class="full">${esc(r.message)}</span></span>`; }
+
+      // 인원·참석자 칸에서도 어긋난 지점을 바로 보이게 한다
+      function partyCell(r) {
+        const base = (Number(r.party) || 0) + "명";
+        return r.selfMissing ? `${base} <span class="warnnote">+대표자 = ${(Number(r.party) || 0) + 1}명</span>` : base;
+      }
+      function attendeeCell(r) {
+        if (!r.attendees.length) return "-";
+        const names = esc(r.attendees.join(", "));
+        if (r.selfMissing) return `${names} <span class="warnnote">· 대표자 이름 없음</span>`;
+        if (r.countMismatch) return `${names} <span class="warnnote">· 이름 ${r.attendees.length}개 / 인원 ${Number(r.party) || 0}명</span>`;
+        return names;
+      }
 
       function applyFilters() {
         const list = currentFilterRows();
@@ -360,17 +426,17 @@
         $("[data-count]").textContent =
           `표시 ${list.length}건 (참석 ${shownAtt.length}건 · ${sumParty(shownAtt)}명) · 전체 ${rows.length}건`;
         $("[data-empty]").classList.toggle("hidden", list.length !== 0);
-        $("[data-tbody]").innerHTML = list.map((r) => `<tr class="${r.isLatest ? "" : "stale"}">
-          <td>${esc(fmtDate(r.created))}</td><td>${statusBadge(r)}</td><td>${sideBadge(r)}</td><td>${esc(r.name)}</td>
-          <td>${phoneCell(r)}</td><td>${r.status === "attending" ? r.party + "명" : "-"}</td>
-          <td>${r.attendees.length ? esc(r.attendees.join(", ")) : "-"}</td><td>${msgCell(r)}</td><td>${stateBadges(r)}</td>
+        $("[data-tbody]").innerHTML = list.map((r) => `<tr class="${r.isLatest ? "" : "stale"}${r.needsCheck ? " needs-check" : ""}">
+          <td class="nw">${esc(fmtDate(r.created))}</td><td>${statusBadge(r)}</td><td>${sideBadge(r)}</td><td class="nw">${esc(r.name)}</td>
+          <td>${phoneCell(r)}</td><td>${r.status === "attending" ? partyCell(r) : "-"}</td>
+          <td class="attcol">${attendeeCell(r)}</td><td class="msgcol">${msgCell(r)}</td><td>${stateBadges(r)}</td>
           <td><button class="del-btn" data-del="${esc(r.id)}" data-del-name="${esc(r.name)}">삭제</button></td></tr>`).join("");
-        $("[data-mobile]").innerHTML = list.map((r) => `<div class="rc ${r.isLatest ? "" : "stale"}">
+        $("[data-mobile]").innerHTML = list.map((r) => `<div class="rc ${r.isLatest ? "" : "stale"}${r.needsCheck ? " needs-check" : ""}">
           <div class="rc-head">${statusBadge(r)} ${sideBadge(r)} ${stateBadges(r)}</div>
           <div class="rc-line"><span class="rc-k">대표자</span> ${esc(r.name)}</div>
           <div class="rc-line"><span class="rc-k">연락처</span> ${phoneCell(r)}</div>
-          <div class="rc-line"><span class="rc-k">인원</span> ${r.status === "attending" ? r.party + "명" : "-"}</div>
-          <div class="rc-line"><span class="rc-k">참석자</span> ${r.attendees.length ? esc(r.attendees.join(", ")) : "-"}</div>
+          <div class="rc-line"><span class="rc-k">인원</span> ${r.status === "attending" ? partyCell(r) : "-"}</div>
+          <div class="rc-line"><span class="rc-k">참석자</span> ${attendeeCell(r)}</div>
           <div class="rc-line"><span class="rc-k">전달</span> ${r.message ? esc(r.message) : "-"}</div>
           <div class="rc-line"><span class="rc-k">일시</span> ${esc(fmtDate(r.created))}</div>
           <div class="rc-line" style="margin-top:8px"><button class="del-btn" data-del="${esc(r.id)}" data-del-name="${esc(r.name)}">삭제</button></div></div>`).join("");
@@ -380,12 +446,13 @@
       function downloadCsv() {
         if (!confirm("이 파일에는 이름과 연락처가 포함되어 있습니다. 안전한 장소에 보관해 주세요.\n계속할까요?")) return;
         const list = currentFilterRows();
-        const head = ["submitted_at","status","side","respondent_name","phone","party_size","attendee_names","message","is_latest","duplicate_group"];
+        const head = ["submitted_at","status","side","respondent_name","phone","party_size","attendee_names","message","is_latest","duplicate_group","attendee_name_count","check_needed"];
         const q = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
         const lines = [head.join(",")];
         list.forEach((r) => lines.push([q(r.created ? r.created.toISOString() : ""), q(r.status), q(r.side), q(r.name),
           q('="' + normPhone(r.phone) + '"'), q(r.party), q(r.attendees.join(" / ")), q(r.message.replace(/[\r\n]+/g, " ")),
-          q(r.isLatest ? "latest" : "old"), q(r.dupGroupSize > 1 ? r.dupKey : "")].join(",")));
+          q(r.isLatest ? "latest" : "old"), q(r.dupGroupSize > 1 ? r.dupKey : ""), q(r.attendees.length),
+          q(r.selfMissing ? "respondent_not_in_attendees" : r.countMismatch ? "count_mismatch" : "")].join(",")));
         const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
         const d = new Date(), p = (n) => String(n).padStart(2, "0");
         if (csvUrl) URL.revokeObjectURL(csvUrl);
