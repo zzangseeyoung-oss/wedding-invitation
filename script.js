@@ -108,3 +108,47 @@ if (countdown) {
   audio.addEventListener("pause", reflect);
   reflect();
 })();
+
+/* ---------- 스크롤 등장 ----------
+   섹션이 뷰포트에 들어올 때 한 번만 살짝 올라오며 나타난다.
+   JS가 동작할 때만 숨기므로(js-reveal), 스크립트가 실패해도 내용은 그대로 보인다. */
+(() => {
+  const targets = document.querySelectorAll(
+    ".invitation-copy, .story-ai-card, .date-section, .rsvp-section, .location, .account-section, .guestbook, .closing"
+  );
+  if (!targets.length) return;
+
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !("IntersectionObserver" in window)) return;
+
+  document.documentElement.classList.add("js-reveal");
+  targets.forEach((el) => el.classList.add("reveal"));
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-in");
+        io.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -12% 0px", threshold: 0.06 }
+  );
+  targets.forEach((el) => io.observe(el));
+
+  /* 안전장치: 관찰이 어떤 이유로든 동작하지 않아도 스크롤만 하면 드러나게 한다.
+     (일정 시간 뒤 전부 보이게 하면 연출 자체가 사라지므로 그렇게 하지 않는다) */
+  let left = targets.length;
+  const sweep = () => {
+    targets.forEach((el) => {
+      if (el.classList.contains("is-in")) return;
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.94) {
+        el.classList.add("is-in");
+        left -= 1;
+      }
+    });
+    if (left <= 0) window.removeEventListener("scroll", sweep);
+  };
+  window.addEventListener("scroll", sweep, { passive: true });
+  sweep();
+})();
