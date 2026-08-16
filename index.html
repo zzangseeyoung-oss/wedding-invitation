@@ -40,22 +40,31 @@
     <button type="button" class="bgm-toggle" data-bgm-toggle aria-label="배경음악 재생 또는 일시정지" aria-pressed="false">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v11" /><circle cx="6" cy="18" r="2.6" /><circle cx="16" cy="15" r="2.6" /><line class="bgm-slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" /></svg>
     </button>
+    <!-- 잎 모양 정의(단풍·은행·일반잎). 한 번만 정의하고 use로 재사용한다. -->
+    <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+      <defs>
+        <path id="lf-maple" d="M12 22.2v-5.1c-1 .5-2.2.8-3.1.6.3-.9.4-1.7.3-2.3-1.7.7-4.3 1.1-5.6.4.9-.8 1.5-1.6 1.7-2.3-1.6-.5-3.4-1.6-3.9-2.9 1.2-.1 2.1-.4 2.7-.8C3 8.7 2.4 6.7 2.8 5.3c1.1.6 2.1.9 2.8.9-.2-1.6 0-3.6.9-4.6.8.9 1.6 1.5 2.3 1.7.4-1.2 1.4-2.6 3.2-3.3 1.8.7 2.8 2.1 3.2 3.3.7-.2 1.5-.8 2.3-1.7.9 1 1.1 3 .9 4.6.7 0 1.7-.3 2.8-.9.4 1.4-.2 3.4-1.3 4.5.6.4 1.5.7 2.7.8-.5 1.3-2.3 2.4-3.9 2.9.2.7.8 1.5 1.7 2.3-1.3.7-3.9.3-5.6-.4-.1.6 0 1.4.3 2.3-.9.2-2.1-.1-3.1-.6v5.1z" />
+        <path id="lf-ginkgo" d="M12 21.8L11.6 15 2.9 12.5A9.5 9.5 0 0 1 11.4 8.2L12 10.4 12.6 8.2A9.5 9.5 0 0 1 21.1 12.5L12.4 15Z" />
+        <path id="lf-plain" d="M12 1.9c.3 3.1 3.9 5.4 5.9 8.1 2.6 3.5 1.4 8.3-2.2 10.3-2.4 1.3-5.4 1.3-7.8 0-3.6-2-4.8-6.8-2.2-10.3C7.7 7.3 11.4 5 12 1.9z" />
+      </defs>
+    </svg>
+
     <!-- 10월 예식에 맞춘 낙엽. 화면 전체에 고정으로 깔아 어느 구간을 보든 떨어진다.
          pointer-events:none 이라 조작을 막지 않고, z-index는 모달(50~60)보다 낮다.
          '애니메이션 제거'를 켠 기기에서는 움직이지 않고 흩뿌려진 상태로 보인다.
          --st = 애니메이션이 꺼졌을 때의 고정 위치 -->
     <div class="leaves" aria-hidden="true">
-      <i style="--x:  5%; --s: 20px; --dur: 15s; --delay:  -1s; --rot:  210deg; --c: #c58f2e; --st:  8%"></i>
-      <i style="--x: 14%; --s: 15px; --dur: 19s; --delay:  -7s; --rot: -170deg; --c: #b0692c; --st: 62%"></i>
-      <i style="--x: 23%; --s: 23px; --dur: 17s; --delay: -12s; --rot:  260deg; --c: #cfa63f; --st: 31%"></i>
-      <i style="--x: 32%; --s: 16px; --dur: 22s; --delay:  -4s; --rot: -220deg; --c: #a97c33; --st: 78%"></i>
-      <i style="--x: 41%; --s: 21px; --dur: 16s; --delay:  -9s; --rot:  190deg; --c: #c58f2e; --st: 17%"></i>
-      <i style="--x: 50%; --s: 14px; --dur: 20s; --delay: -15s; --rot: -250deg; --c: #8f9a5b; --st: 54%"></i>
-      <i style="--x: 59%; --s: 24px; --dur: 18s; --delay:  -3s; --rot:  230deg; --c: #bb7b2f; --st: 88%"></i>
-      <i style="--x: 68%; --s: 17px; --dur: 21s; --delay: -11s; --rot: -180deg; --c: #cfa63f; --st: 40%"></i>
-      <i style="--x: 77%; --s: 19px; --dur: 15s; --delay: -18s; --rot:  240deg; --c: #b0692c; --st: 70%"></i>
-      <i style="--x: 86%; --s: 13px; --dur: 23s; --delay:  -6s; --rot: -200deg; --c: #8f9a5b; --st: 24%"></i>
-      <i style="--x: 94%; --s: 22px; --dur: 17s; --delay: -13s; --rot:  200deg; --c: #c58f2e; --st: 47%"></i>
+      <svg class="leaf maple"  viewBox="0 0 24 24" style="--x:  5%; --s: 21px; --dur: 15s; --delay:    0s; --rot:  210deg; --c: #b5482c"><use href="#lf-maple" /></svg>
+      <svg class="leaf ginkgo" viewBox="0 0 24 24" style="--x: 14%; --s: 16px; --dur: 19s; --delay: -1.7s; --rot: -170deg; --c: #d8a92e"><use href="#lf-ginkgo" /></svg>
+      <svg class="leaf plain"  viewBox="0 0 24 24" style="--x: 23%; --s: 22px; --dur: 17s; --delay: -2.9s; --rot:  260deg; --c: #8f9a5b"><use href="#lf-plain" /></svg>
+      <svg class="leaf maple"  viewBox="0 0 24 24" style="--x: 32%; --s: 17px; --dur: 22s; --delay: -5.7s; --rot: -220deg; --c: #c2562f"><use href="#lf-maple" /></svg>
+      <svg class="leaf ginkgo" viewBox="0 0 24 24" style="--x: 41%; --s: 20px; --dur: 16s; --delay: -5.3s; --rot:  190deg; --c: #e0b53a"><use href="#lf-ginkgo" /></svg>
+      <svg class="leaf plain"  viewBox="0 0 24 24" style="--x: 50%; --s: 15px; --dur: 20s; --delay: -8.4s; --rot: -250deg; --c: #a97c33"><use href="#lf-plain" /></svg>
+      <svg class="leaf maple"  viewBox="0 0 24 24" style="--x: 59%; --s: 24px; --dur: 18s; --delay: -9.0s; --rot:  230deg; --c: #a8391f"><use href="#lf-maple" /></svg>
+      <svg class="leaf ginkgo" viewBox="0 0 24 24" style="--x: 68%; --s: 18px; --dur: 21s; --delay:-12.4s; --rot: -180deg; --c: #c99a24"><use href="#lf-ginkgo" /></svg>
+      <svg class="leaf plain"  viewBox="0 0 24 24" style="--x: 77%; --s: 19px; --dur: 15s; --delay:-10.1s; --rot:  240deg; --c: #bb7b2f"><use href="#lf-plain" /></svg>
+      <svg class="leaf maple"  viewBox="0 0 24 24" style="--x: 86%; --s: 14px; --dur: 23s; --delay:-17.3s; --rot: -200deg; --c: #c2562f"><use href="#lf-maple" /></svg>
+      <svg class="leaf ginkgo" viewBox="0 0 24 24" style="--x: 94%; --s: 21px; --dur: 17s; --delay:-14.1s; --rot:  200deg; --c: #d8a92e"><use href="#lf-ginkgo" /></svg>
     </div>
 
     <main class="invitation">
