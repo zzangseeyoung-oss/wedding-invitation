@@ -1272,21 +1272,31 @@ body.guestbook-is-open {
 }
 .leaves i {
   position: absolute;
-  top: -6%;
+  top: -8%;
   left: var(--x);
   width: var(--s);
-  height: var(--s);
+  height: calc(var(--s) * 0.82);
   background: var(--c);
+  /* 한쪽이 뾰족한 잎 모양 */
   border-radius: 0 100% 0 100%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
   opacity: 0;
-  animation: leaf-fall var(--dur) linear var(--delay) infinite;
+  /* ★축약형에 var()를 쓰면 iOS Safari에서 파싱에 실패해 아예 안 도는 사례가 있어
+     반드시 longhand로 쓴다. */
+  animation-name: leaf-fall;
+  animation-duration: var(--dur);
+  animation-delay: var(--delay);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
 }
 @keyframes leaf-fall {
   0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
-  8% { opacity: 0.5; }
-  50% { transform: translate(18px, 46vh) rotate(calc(var(--rot) * 0.5)); }
-  85% { opacity: 0.42; }
-  100% { transform: translate(-10px, 96vh) rotate(var(--rot)); opacity: 0; }
+  6% { opacity: 0.72; }
+  30% { transform: translate(26px, 30vh) rotate(calc(var(--rot) * 0.32)); }
+  60% { transform: translate(-16px, 60vh) rotate(calc(var(--rot) * 0.66)); }
+  90% { opacity: 0.6; }
+  100% { transform: translate(20px, 104vh) rotate(var(--rot)); opacity: 0; }
 }
 
 /* ============ 스크롤 등장 ============ */
