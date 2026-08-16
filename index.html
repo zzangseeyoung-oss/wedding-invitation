@@ -4,11 +4,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
     <meta name="theme-color" content="#f7f0df" />
-    <meta name="description" content="장시영 · 이근영 결혼식에 초대합니다." />
+    <meta name="description" content="장시영 · 이근영 결혼식에 초대합니다. 2026년 10월 10일 토요일 낮 12시 30분, 용인 코티지 보타닉 하우스." />
+    <!-- 공유 카드(카카오톡 등). og:image는 가로로 잘리므로 1200x630 전용 이미지를 쓴다.
+         설명은 짧게 — 길면 카드에서 말줄임으로 잘린다. -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="장시영 · 이근영 결혼식" />
+    <meta property="og:url" content="https://zzangseeyoung-oss.github.io/wedding-invitation/" />
     <meta property="og:title" content="장시영 · 이근영 결혼식에 초대합니다" />
-    <meta property="og:description" content="2026년 10월 10일 토요일 오후 12시 30분, 용인 코티지 보타닉 하우스" />
-    <meta property="og:image" content="assets/cover-scene.jpg" />
+    <meta property="og:description" content="2026년 10월 10일 토요일 낮 12시 30분" />
+    <meta property="og:image" content="https://zzangseeyoung-oss.github.io/wedding-invitation/assets/share-card.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="온실 정원 앞에 선 신랑 신부 그림과 예식 일시" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="장시영 · 이근영 결혼식에 초대합니다" />
+    <meta name="twitter:description" content="2026년 10월 10일 토요일 낮 12시 30분" />
+    <meta name="twitter:image" content="https://zzangseeyoung-oss.github.io/wedding-invitation/assets/share-card.jpg" />
     <title>장시영 · 이근영 결혼식에 초대합니다</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,7 +32,9 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <audio id="wedding-bgm" loop preload="auto" playsinline>
+    <!-- preload=none: 브라우저가 자동재생을 막으므로 음악은 버튼을 누를 때 받으면 된다.
+         auto로 두면 듣지도 않을 파일을 모든 하객이 첫 로드에 내려받는다. -->
+    <audio id="wedding-bgm" loop preload="none" playsinline>
       <source src="assets/bgm.mp3" type="audio/mpeg" />
     </audio>
     <button type="button" class="bgm-toggle" data-bgm-toggle aria-label="배경음악 재생 또는 일시정지" aria-pressed="false">
