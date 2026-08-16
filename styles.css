@@ -1264,9 +1264,9 @@ body.guestbook-is-open {
 
 /* ============ 낙엽(히어로 장식) ============ */
 .leaves {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 1;
+  z-index: 4; /* 콘텐츠 위, 토스트(20)·시트/모달(50~60) 아래 */
   pointer-events: none;
   overflow: hidden;
 }
@@ -1316,8 +1316,13 @@ body.guestbook-is-open {
     scroll-behavior: auto;
   }
 
-  .leaves {
-    display: none;
+  /* '애니메이션 제거'를 켠 기기(안드로이드 절전·접근성, iOS 동작 줄이기)에서는
+     낙엽을 숨기지 않고 '움직이지 않는 장식'으로 남긴다. 흔들림은 없애되
+     가을 분위기는 유지한다. */
+  .leaves i {
+    animation: none;
+    top: var(--st, 30%);
+    opacity: 0.5;
   }
 
   .js-reveal .reveal,
