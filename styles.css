@@ -1298,6 +1298,13 @@ body.guestbook-is-open {
   90% { opacity: 0.6; }
   100% { transform: translate(20px, 104vh) rotate(var(--rot)); opacity: 0; }
 }
+/* 동작 최소화 버전: 회전·좌우 흔들림 없이 수직으로만 천천히 */
+@keyframes leaf-fall-calm {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 0.45; }
+  90% { opacity: 0.38; }
+  100% { transform: translateY(104vh); opacity: 0; }
+}
 
 /* ============ 스크롤 등장 ============ */
 /* JS가 켜진 경우에만 숨긴다. JS 실패 시 내용이 사라지면 안 되므로 html.js-reveal 기준. */
@@ -1316,13 +1323,18 @@ body.guestbook-is-open {
     scroll-behavior: auto;
   }
 
-  /* '애니메이션 제거'를 켠 기기(안드로이드 절전·접근성, iOS 동작 줄이기)에서는
-     낙엽을 숨기지 않고 '움직이지 않는 장식'으로 남긴다. 흔들림은 없애되
-     가을 분위기는 유지한다. */
+  /* '애니메이션 제거'가 켜진 기기(안드로이드는 절전모드만 켜도 여기에 해당)에서도
+     낙엽은 계속 떨어지게 둔다. 대신 개수를 줄이고, 느리게, 회전·좌우 흔들림 없이
+     수직으로만 내려오게 해서 움직임의 양을 크게 줄인다. */
   .leaves i {
-    animation: none;
-    top: var(--st, 30%);
-    opacity: 0.5;
+    animation-name: leaf-fall-calm;
+    animation-duration: calc(var(--dur) * 1.7);
+    opacity: 0.45;
+  }
+  /* 11장 중 4장만 남겨 시야에 들어오는 움직임을 줄인다 */
+  .leaves i:nth-child(3n + 2),
+  .leaves i:nth-child(3n + 3) {
+    display: none;
   }
 
   .js-reveal .reveal,
