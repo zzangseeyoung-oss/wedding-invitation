@@ -436,6 +436,26 @@ h2 {
   text-align: center;
 }
 
+/* 예식장 외관 사진 — 약도와 같은 각진 1px 테두리로 통일 */
+.venue-photo {
+  position: relative;
+  margin: 16px 0 0;
+}
+.venue-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  background: var(--paper-light);
+}
+.venue-photo figcaption {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font: 400 0.78rem/1.55 var(--sans);
+  text-align: left;
+  word-break: keep-all;
+}
+
 .map-link {
   position: relative;
   display: block;
