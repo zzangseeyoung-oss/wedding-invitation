@@ -2006,43 +2006,6 @@ body.rsvp-is-open {
   font: 400 0.78rem/1.5 var(--sans);
 }
 
-/* 반려견 동반 안내 — 버튼 폭에 맞춘 작은 카드 */
-.pet-note {
-  width: min(100%, 320px);
-  margin: 16px auto 0;
-  padding: 12px 14px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  border: 1px solid rgba(61, 106, 84, 0.2);
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(255, 250, 240, 0.95), rgba(238, 244, 237, 0.8));
-  text-align: left;
-}
-.pet-note-mark {
-  flex: none;
-  margin-top: 1px;
-  color: var(--green);
-  line-height: 0;
-}
-.pet-note-text {
-  display: block;
-  word-break: keep-all;
-}
-.pet-note b {
-  display: block;
-  color: var(--green-dark);
-  font: 600 0.9rem/1.45 var(--sans);
-  letter-spacing: -0.01em;
-}
-.pet-note em {
-  display: block;
-  margin-top: 3px;
-  color: var(--muted);
-  font: 400 0.78rem/1.55 var(--sans);
-  font-style: normal;
-}
-
 /* ==================== RSVP 모달 ==================== */
 .rsvp-modal {
   position: fixed;
