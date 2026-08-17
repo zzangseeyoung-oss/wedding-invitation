@@ -160,7 +160,7 @@ function renderAttendees() {
     row.className = "rsvp-attendee-row";
     const tag = document.createElement("span");
     tag.className = "rsvp-attendee-tag";
-    tag.textContent = `참석자 ${i + 1}`;
+    tag.textContent = i === 0 ? "참석자 1 (본인)" : `참석자 ${i + 1}`;
     const input = document.createElement("input");
     input.type = "text";
     input.maxLength = NAME_MAX;

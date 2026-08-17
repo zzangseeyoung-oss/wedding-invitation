@@ -23,12 +23,13 @@
     <title>장시영 · 이근영 결혼식에 초대합니다</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" href="assets/cover-scene.jpg" type="image/jpeg" />
+    <link rel="icon" href="assets/favicon-64.png" type="image/png" sizes="64x64" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400;500;600&amp;display=swap"
       rel="stylesheet"
     />
-    <link rel="preload" href="assets/cover-scene.jpg" as="image" />
+    <link rel="preload" href="assets/cover-scene.webp" as="image" type="image/webp" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -70,6 +71,7 @@
     <main class="invitation">
       <section class="hero" aria-labelledby="couple-names">
         <picture class="hero-media">
+          <source srcset="assets/cover-scene.webp" type="image/webp" />
           <img src="assets/cover-scene.jpg" alt="가을 정원의 온실 앞에 나란히 선 신랑 신부 수채화" fetchpriority="high" />
         </picture>
         <div class="hero-frame" aria-hidden="true"></div>
@@ -141,7 +143,10 @@
 
       <section class="date-section" aria-labelledby="date-title">
         <figure class="moon-scene">
-          <img src="assets/moon-scene.jpg" alt="달빛 아래 정원에 나란히 앉은 신랑 신부 수채화" loading="lazy" decoding="async" />
+          <picture>
+            <source srcset="assets/moon-scene.webp" type="image/webp" />
+            <img src="assets/moon-scene.jpg" alt="달빛 아래 정원에 나란히 앉은 신랑 신부 수채화" loading="lazy" decoding="async" />
+          </picture>
         </figure>
         <div class="paper-section date-content">
           <p class="section-kicker">Save the Date</p>
@@ -200,7 +205,10 @@
         <p class="address">경기 용인시 처인구 신송로55번길 10</p>
 
         <figure class="venue-photo">
-          <img src="assets/venue-exterior.jpg" alt="코티지 보타닉 하우스 외관 — 유리 온실이 있는 건물" loading="lazy" decoding="async" width="1280" height="902" />
+          <picture>
+            <source srcset="assets/venue-exterior.webp" type="image/webp" />
+            <img src="assets/venue-exterior.jpg" alt="코티지 보타닉 하우스 외관 — 유리 온실이 있는 건물" loading="lazy" decoding="async" width="1280" height="902" />
+          </picture>
           <figcaption>유리 온실이 있는 이 건물이에요. 마을 안쪽에 있어 도착하실 때 참고해 주세요.</figcaption>
         </figure>
 
@@ -211,7 +219,10 @@
           rel="noreferrer"
           aria-label="네이버 지도에서 용인 코티지 보타닉 하우스 보기"
         >
-          <img src="assets/paper-map.jpg" alt="용인 코티지 보타닉 하우스 약도" loading="lazy" decoding="async" />
+          <picture>
+            <source srcset="assets/paper-map.webp" type="image/webp" />
+            <img src="assets/paper-map.jpg" alt="용인 코티지 보타닉 하우스 약도" loading="lazy" decoding="async" />
+          </picture>
         </a>
 
         <div class="map-actions">
