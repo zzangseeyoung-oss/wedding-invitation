@@ -113,6 +113,7 @@ const againBtn = document.querySelector("[data-rsvp-again]");
 let store = null;
 let submitting = false;
 let attendeeNames = [""];
+let attendeeKids = [false]; // 참석자별 미취학 아동 여부
 let lastAutoName = "";
 
 /* ---------- 상태 분기 ---------- */
@@ -141,11 +142,10 @@ function partySize() {
 function setPartySize(n) {
   const size = Math.min(PARTY_MAX, Math.max(1, n));
   if (partyInput) partyInput.value = String(size);
-  if (attendeeNames.length < size) {
-    while (attendeeNames.length < size) attendeeNames.push("");
-  } else if (attendeeNames.length > size) {
-    attendeeNames = attendeeNames.slice(0, size);
-  }
+  while (attendeeNames.length < size) attendeeNames.push("");
+  while (attendeeKids.length < size) attendeeKids.push(false);
+  attendeeNames = attendeeNames.slice(0, size);
+  attendeeKids = attendeeKids.slice(0, size);
   renderAttendees();
 }
 
@@ -153,11 +153,17 @@ function renderAttendees() {
   if (!attendeesBox) return;
   const size = partySize();
   while (attendeeNames.length < size) attendeeNames.push("");
+  while (attendeeKids.length < size) attendeeKids.push(false);
   attendeeNames = attendeeNames.slice(0, size);
+  attendeeKids = attendeeKids.slice(0, size);
   attendeesBox.replaceChildren();
   for (let i = 0; i < size; i += 1) {
-    const row = document.createElement("label");
+    /* 행은 div로 둔다. label로 감싸면 아동 체크박스를 눌러도 이름칸이 포커스된다. */
+    const row = document.createElement("div");
     row.className = "rsvp-attendee-row";
+
+    const nameLabel = document.createElement("label");
+    nameLabel.className = "rsvp-attendee-name";
     const tag = document.createElement("span");
     tag.className = "rsvp-attendee-tag";
     tag.textContent = i === 0 ? "참석자 1 (본인)" : `참석자 ${i + 1}`;
@@ -172,7 +178,23 @@ function renderAttendees() {
       attendeeNames[i] = input.value;
       if (i === 0) lastAutoName = ""; // 사용자가 직접 수정하면 자동채움 해제
     });
-    row.append(tag, input);
+    nameLabel.append(tag, input);
+
+    /* 식사·좌석 준비를 위해 미취학 아동을 따로 받는다 */
+    const kid = document.createElement("label");
+    kid.className = "rsvp-attendee-kid";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = !!attendeeKids[i];
+    box.setAttribute("aria-label", `참석자 ${i + 1} 미취학 아동 여부`);
+    box.addEventListener("change", () => {
+      attendeeKids[i] = box.checked;
+    });
+    const kidText = document.createElement("span");
+    kidText.textContent = "미취학 아동";
+    kid.append(box, kidText);
+
+    row.append(nameLabel, kid);
     attendeesBox.append(row);
   }
 }
@@ -249,6 +271,7 @@ function setOpen(open) {
 function resetForm() {
   if (form) form.reset();
   attendeeNames = [""];
+  attendeeKids = [false];
   lastAutoName = "";
   if (partyInput) partyInput.value = "1";
   clearError();
@@ -294,7 +317,7 @@ async function handleSubmit(event) {
     if (names.length !== partyCount || names.some((n) => !n)) {
       return showError(`참석자 이름을 인원 수(${partyCount}명)만큼 모두 입력해 주세요.`);
     }
-    attendees = names.map((n) => ({ name: n }));
+    attendees = names.map((n, i) => ({ name: n, child: !!attendeeKids[i] }));
     message = (form.message_attending.value || "").trim();
   } else {
     partyCount = 0;

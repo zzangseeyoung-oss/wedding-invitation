@@ -105,6 +105,9 @@
       .badge.old { background: #eee; color: var(--muted); }
       .badge.dup { background: #f7efe3; color: var(--warn); }
       .muted-note { color: var(--muted); font-size: 0.78rem; }
+      .kidmark { display: inline-block; padding: 0 6px; border-radius: 20px; background: #eaf1f7; color: #2f5d8a; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+      .kidline { margin-top: 10px; color: var(--muted); font-size: 0.8rem; }
+      .kidline b { color: var(--blue); }
       .phone-cell { white-space: nowrap; }
       .phone-cell a { text-decoration: none; font-weight: 600; }
       .phone-cell .copy { margin-left: 6px; color: var(--muted); cursor: pointer; background: none; border: 0; font-size: 0.76rem; }
@@ -283,7 +286,9 @@
           const snap = await fs.getDocs(q);
           const raw = snap.docs.map((d) => { const x = d.data(); const ca = x.created_at && x.created_at.toDate ? x.created_at.toDate() : null;
             return { id: d.id, status: x.status, side: x.side, name: x.respondent_name || "", phone: x.phone || "", party: x.party_size || 0,
-              attendees: Array.isArray(x.attendees) ? x.attendees.map((a) => a && a.name).filter(Boolean) : [], message: x.message || "", created: ca }; });
+              attendees: Array.isArray(x.attendees) ? x.attendees.map((a) => a && a.name).filter(Boolean) : [],
+              kids: Array.isArray(x.attendees) ? x.attendees.filter((a) => a && a.child).map((a) => a.name).filter(Boolean) : [],
+              message: x.message || "", created: ca }; });
           const groups = {}; raw.forEach((r) => { const k = normPhone(r.phone) || ("__" + r.id); (groups[k] ||= []).push(r); });
           Object.values(groups).forEach((g) => { g.sort((a, b) => (b.created?.getTime() || 0) - (a.created?.getTime() || 0));
             g.forEach((r, i) => { r.isLatest = i === 0; r.dupGroupSize = g.length; r.dupKey = normPhone(r.phone) || r.id; }); });
@@ -305,6 +310,8 @@
         return Math.max(p, 1 + others);
       }
       const sumParty = (a) => a.reduce((s, r) => s + headcount(r), 0);
+      // 미취학 아동 수(식사·좌석 준비용)
+      const sumKids = (a) => a.reduce((s, r) => s + (r.kids ? r.kids.length : 0), 0);
 
       const squash = (s) => String(s || "").replace(/\s+/g, "");
       function sameName(a, b) {
@@ -326,6 +333,7 @@
         const gHead = sumParty(att.filter((r) => r.side === "groom"));
         const bHead = sumParty(att.filter((r) => r.side === "bride"));
         const dup = rows.filter((r) => r.dupGroupSize > 1).length;
+        const kids = sumKids(att);
         const gPct = head ? Math.round((gHead / head) * 100) : 0;
         // 건수와 인원이 왜 다른지를 화면에서 바로 설명한다(응답 3건 = 4명 같은 경우).
         const recon = head
@@ -347,6 +355,7 @@
                 <div class="side-box g"><div class="k">신랑측</div><div class="v">${gHead}명</div></div>
                 <div class="side-box b"><div class="k">신부측</div><div class="v">${bHead}명</div></div>
               </div>
+              ${kids ? `<div class="kidline">그중 <b>미취학 아동 ${kids}명</b> · 성인 ${head - kids}명</div>` : ""}
               ${head ? `<div class="bar"><i class="fg" style="width:${gPct}%"></i><i class="fb" style="width:${100 - gPct}%"></i></div>` : ""}
             </div>
           </div>
@@ -354,6 +363,7 @@
             ${chip("참석 응답", att.length, "건", "att")}
             ${chip("불참 응답", dec.length, "건", "dec")}
             ${chip("전체 응답", rows.length, "건")}
+            ${chip("미취학 아동", kids, "명", "warn")}
             ${chip("중복 가능", dup, "건", "warn")}
           </div>`;
       }
@@ -379,18 +389,25 @@
       function msgCell(r) { if (!r.message) return "-"; if (r.message.length <= 24) return `<span>${esc(r.message)}</span>`;
         return `<span class="msg"><span class="short">${esc(r.message.slice(0,24))}… <button class="link" data-toggle-msg>더보기</button></span><span class="full">${esc(r.message)}</span></span>`; }
 
-      const partyCell = (r) => headcount(r) + "명";
+      const partyCell = (r) => {
+        const k = (r.kids || []).length;
+        return headcount(r) + "명" + (k ? ` <span class="kidmark">아동 ${k}</span>` : "");
+      };
+      const isKid = (r, name) => (r.kids || []).some((k) => sameName(k, name));
+      const tagKid = (r, name) => esc(name) + (isKid(r, name) ? ' <span class="kidmark">아동</span>' : "");
       function attendeeCell(r) {
         const list = attendeeNames(r);
         if (!list.length) return "-";
-        return list.length > 1 ? `${esc(list[0])} <span class="muted-note">외 ${list.length - 1}명</span> · ${esc(list.slice(1).join(", "))}` : esc(list[0]);
+        if (list.length === 1) return tagKid(r, list[0]);
+        return `${tagKid(r, list[0])} <span class="muted-note">외 ${list.length - 1}명</span> · ${list.slice(1).map((x) => tagKid(r, x)).join(", ")}`;
       }
 
       function applyFilters() {
         const list = currentFilterRows();
         const shownAtt = list.filter((r) => r.status === "attending");
         $("[data-count]").textContent =
-          `표시 ${list.length}건 (참석 ${shownAtt.length}건 · ${sumParty(shownAtt)}명) · 전체 ${rows.length}건`;
+          `표시 ${list.length}건 (참석 ${shownAtt.length}건 · ${sumParty(shownAtt)}명` +
+          (sumKids(shownAtt) ? ` · 아동 ${sumKids(shownAtt)}명` : "") + `) · 전체 ${rows.length}건`;
         $("[data-empty]").classList.toggle("hidden", list.length !== 0);
         $("[data-tbody]").innerHTML = list.map((r) => `<tr class="${r.isLatest ? "" : "stale"}">
           <td class="nw">${esc(fmtDate(r.created))}</td><td>${statusBadge(r)}</td><td>${sideBadge(r)}</td><td class="nw">${esc(r.name)}</td>
@@ -412,13 +429,13 @@
       function downloadCsv() {
         if (!confirm("이 파일에는 이름과 연락처가 포함되어 있습니다. 안전한 장소에 보관해 주세요.\n계속할까요?")) return;
         const list = currentFilterRows();
-        const head = ["submitted_at","status","side","respondent_name","phone","party_size","attendee_names","message","is_latest","duplicate_group","attendee_name_count","headcount_effective"];
+        const head = ["submitted_at","status","side","respondent_name","phone","party_size","attendee_names","message","is_latest","duplicate_group","attendee_name_count","headcount_effective","preschool_child_count","preschool_child_names"];
         const q = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
         const lines = [head.join(",")];
         list.forEach((r) => lines.push([q(r.created ? r.created.toISOString() : ""), q(r.status), q(r.side), q(r.name),
           q('="' + normPhone(r.phone) + '"'), q(r.party), q(r.attendees.join(" / ")), q(r.message.replace(/[\r\n]+/g, " ")),
           q(r.isLatest ? "latest" : "old"), q(r.dupGroupSize > 1 ? r.dupKey : ""), q(r.attendees.length),
-          q(headcount(r))].join(",")));
+          q(headcount(r)), q((r.kids || []).length), q((r.kids || []).join(" / "))].join(",")));
         const blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
         const d = new Date(), p = (n) => String(n).padStart(2, "0");
         if (csvUrl) URL.revokeObjectURL(csvUrl);

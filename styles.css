@@ -2278,6 +2278,39 @@ body.rsvp-is-open {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
+}
+.rsvp-attendee-name {
+  flex: 1 1 190px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+/* 미취학 아동 체크 — 식사·좌석 준비에 필요해 참석자별로 받는다 */
+.rsvp-attendee-kid {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font: 500 0.76rem/1 var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.rsvp-attendee-kid input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--green-dark);
+}
+.rsvp-attendee-kid:has(input:checked) {
+  border-color: var(--green-dark);
+  background: rgba(61, 106, 84, 0.09);
+  color: var(--green-dark);
 }
 .rsvp-attendee-tag {
   flex: 0 0 auto;
