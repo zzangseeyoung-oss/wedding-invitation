@@ -29,7 +29,10 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400;500;600&amp;display=swap"
       rel="stylesheet"
     />
-    <link rel="preload" href="assets/cover-scene.webp" as="image" type="image/webp" />
+    <link rel="preload" as="image" type="image/webp"
+      href="assets/cover-scene-1040.webp"
+      imagesrcset="assets/cover-scene-760.webp 760w, assets/cover-scene-1040.webp 1040w"
+      imagesizes="(max-width: 520px) 100vw, 520px" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -71,7 +74,7 @@
     <main class="invitation">
       <section class="hero" aria-labelledby="couple-names">
         <picture class="hero-media">
-          <source srcset="assets/cover-scene.webp" type="image/webp" />
+          <source srcset="assets/cover-scene-760.webp 760w, assets/cover-scene-1040.webp 1040w" sizes="(max-width: 520px) 100vw, 520px" type="image/webp" />
           <img src="assets/cover-scene.jpg" alt="가을 정원의 온실 앞에 나란히 선 신랑 신부 수채화" fetchpriority="high" />
         </picture>
         <div class="hero-frame" aria-hidden="true"></div>
@@ -144,7 +147,7 @@
       <section class="date-section" aria-labelledby="date-title">
         <figure class="moon-scene">
           <picture>
-            <source srcset="assets/moon-scene.webp" type="image/webp" />
+            <source srcset="assets/moon-scene-760.webp 760w, assets/moon-scene-1040.webp 1040w" sizes="(max-width: 520px) 100vw, 520px" type="image/webp" />
             <img src="assets/moon-scene.jpg" alt="달빛 아래 정원에 나란히 앉은 신랑 신부 수채화" loading="lazy" decoding="async" />
           </picture>
         </figure>
@@ -206,7 +209,7 @@
 
         <figure class="venue-photo">
           <picture>
-            <source srcset="assets/venue-exterior.webp" type="image/webp" />
+            <source srcset="assets/venue-exterior-760.webp 760w, assets/venue-exterior-1040.webp 1040w" sizes="(max-width: 520px) 100vw, 520px" type="image/webp" />
             <img src="assets/venue-exterior.jpg" alt="코티지 보타닉 하우스 외관 — 유리 온실이 있는 건물" loading="lazy" decoding="async" width="1280" height="902" />
           </picture>
           <figcaption>유리 온실이 있는 이 건물이에요. 마을 안쪽에 있어 도착하실 때 참고해 주세요.</figcaption>
@@ -220,7 +223,7 @@
           aria-label="네이버 지도에서 용인 코티지 보타닉 하우스 보기"
         >
           <picture>
-            <source srcset="assets/paper-map.webp" type="image/webp" />
+            <source srcset="assets/paper-map-760.webp 760w, assets/paper-map-1040.webp 1040w" sizes="(max-width: 520px) 100vw, 520px" type="image/webp" />
             <img src="assets/paper-map.jpg" alt="용인 코티지 보타닉 하우스 약도" loading="lazy" decoding="async" />
           </picture>
         </a>

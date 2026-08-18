@@ -26,17 +26,23 @@ document.querySelectorAll("[data-copy]").forEach((button) => {
 
 document.querySelectorAll("[data-share]").forEach((button) => {
   button.addEventListener("click", async () => {
+    /* 공유는 항상 정식 주소로. 현재 주소를 그대로 쓰면 ?v=5 같은 캐시무효화
+       쿼리까지 하객에게 퍼진다. og:url을 정본으로 삼고 없으면 현재 주소를 쓴다. */
+    const canonical =
+      document.querySelector('meta[property="og:url"]')?.content ||
+      window.location.origin + window.location.pathname;
     const shareData = {
       title: "장시영 · 이근영 결혼식에 초대합니다",
-      text: "2026년 10월 10일 토요일 오후 12시 30분, 용인 코티지 보타닉 하우스",
-      url: window.location.href,
+      text: "2026년 10월 10일 토요일 낮 12시 30분, 용인 코티지 보타닉 하우스",
+      url: canonical,
     };
 
     try {
       if (navigator.share) {
         await navigator.share(shareData);
       } else {
-        await copyText(window.location.href);
+        await copyText(canonical);
+        showToast("청첩장 주소를 복사했습니다.");
       }
     } catch (error) {
       if (error.name !== "AbortError") {
