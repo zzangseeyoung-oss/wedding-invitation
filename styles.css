@@ -2607,3 +2607,61 @@ body.rsvp-is-open {
     transition: none;
   }
 }
+
+/* ==================== 인쇄 ====================
+   어르신 하객이 인쇄해 보관하는 경우가 있다.
+   ★중요: 스크롤 등장 연출 때문에 아직 화면에 안 나온 섹션은 opacity:0 이라
+   그대로 인쇄하면 빈 종이가 나온다. 인쇄 시에는 반드시 모두 보이게 한다. */
+@media print {
+  .js-reveal .reveal,
+  .js-reveal .reveal.is-in {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  /* 종이에서 의미 없는 장식·조작 요소는 뺀다 */
+  .leaves,
+  .bgm-toggle,
+  .rsvp-open,
+  .share-button,
+  .story-ai-open,
+  .story-ai-hints,
+  .guestbook-open,
+  .guestbook-compose,
+  .rsvp-modal,
+  .map-actions,
+  .route-btn,
+  .toast {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  .invitation {
+    width: 100%;
+    max-width: none;
+    box-shadow: none;
+  }
+
+  .paper-section,
+  .hero,
+  .date-section {
+    background: #fff !important;
+    break-inside: avoid;
+  }
+
+  /* 잉크를 아끼고 글자를 또렷하게 */
+  .paper-section::before,
+  .hero-frame {
+    display: none !important;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}
