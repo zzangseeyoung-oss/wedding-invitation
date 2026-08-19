@@ -179,6 +179,7 @@
         <div class="btnrow">
           <span class="who" data-refreshed></span>
           <button class="btn small" data-refresh>새로고침</button>
+          <button class="btn small" data-gb-all>축하 글 일괄 방명록 등록</button>
           <button class="btn small" data-csv>CSV 내려받기</button>
           <button class="btn small" data-logout>로그아웃</button>
         </div>
@@ -446,6 +447,47 @@
         const buf = await crypto.subtle.digest("SHA-256", data);
         return [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, "0")).join("");
       }
+      async function loadGuestbookIndex() {
+        const snap = await fs.getDocs(fs.collection(db, "guestbook"));
+        return new Set(snap.docs.map((d) => {
+          const x = d.data() || {};
+          return `${String(x.name || "").trim()}|~|${String(x.message || "").trim()}`;
+        }));
+      }
+      async function addGuestbookDoc(name, text, phone) {
+        const salt = makeSalt();
+        // 삭제 비밀번호 = 작성자 연락처 뒤 4자리(본인이 방명록에서 지울 수 있게)
+        const pw = await hashPw(normPhone(phone).slice(-4), salt);
+        await fs.addDoc(fs.collection(db, "guestbook"), {
+          name, message: text, pw, salt, image: null, createdAt: fs.serverTimestamp(),
+        });
+      }
+
+      /* 아직 방명록에 없는 축하 글을 한 번에 올린다.
+         최신 응답만 대상으로 하고(같은 연락처의 옛 응답 제외), 이미 있는 글은 건너뛴다. */
+      async function pushAllToGuestbook() {
+        const targets = rows.filter((r) => r.isLatest && gbText(r));
+        if (!targets.length) return toast("올릴 축하 글이 없습니다.");
+        let index;
+        try { index = await loadGuestbookIndex(); }
+        catch (e) { console.error(e); return toast("방명록을 확인하지 못했습니다."); }
+        const todo = targets.filter((r) => !index.has(`${r.name.trim()}|~|${gbText(r)}`));
+        if (!todo.length) return toast("이미 모두 방명록에 있습니다.");
+        const preview = todo.slice(0, 5).map((r) => `· ${r.name}: ${gbText(r).slice(0, 20)}`).join("\n");
+        if (!confirm(`축하 글 ${todo.length}개를 방명록에 올릴까요?
+
+${preview}${todo.length > 5 ? "\n…" : ""}
+
+공개 방명록에 그대로 보입니다.`)) return;
+        let ok = 0;
+        for (const r of todo) {
+          try { await addGuestbookDoc(r.name, gbText(r), r.phone); ok += 1; }
+          catch (e) { console.error(e); }
+        }
+        const skipped = targets.length - todo.length;
+        toast(`${ok}개를 방명록에 올렸습니다.` + (skipped ? ` (이미 있던 ${skipped}개 제외)` : ""));
+      }
+
       async function pushToGuestbook(id) {
         const r = rows.find((x) => x.id === id);
         if (!r) return;
@@ -463,12 +505,7 @@ ${text}
           if (snap.docs.some((d) => String((d.data() || {}).message || "").trim() === text)) {
             return toast("이미 방명록에 있습니다.");
           }
-          const salt = makeSalt();
-          // 삭제 비밀번호 = 작성자 연락처 뒤 4자리(본인이 방명록에서 지울 수 있게)
-          const pw = await hashPw(normPhone(r.phone).slice(-4), salt);
-          await fs.addDoc(fs.collection(db, "guestbook"), {
-            name: r.name, message: text, pw, salt, image: null, createdAt: fs.serverTimestamp(),
-          });
+          await addGuestbookDoc(r.name, text, r.phone);
           toast("방명록에 올렸습니다.");
         } catch (e) {
           console.error(e);
@@ -526,6 +563,7 @@ ${text}
       $("[data-logout2]").addEventListener("click", doLogout);
       $("[data-refresh]").addEventListener("click", loadData);
       $("[data-csv]").addEventListener("click", downloadCsv);
+      $("[data-gb-all]").addEventListener("click", pushAllToGuestbook);
       ["[data-f-status]", "[data-f-side]", "[data-f-latest]", "[data-f-dup]"].forEach((s) => $(s).addEventListener("change", applyFilters));
       ["[data-f-name]", "[data-f-phone]"].forEach((s) => $(s).addEventListener("input", applyFilters));
       document.addEventListener("click", async (e) => {
