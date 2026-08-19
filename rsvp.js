@@ -45,6 +45,18 @@ function normalizePhone(raw) {
   return (raw || "").replace(/[^0-9]/g, "");
 }
 
+/* ---------- 방명록 비밀번호 (guestbook.js와 동일 규칙이어야 삭제가 된다) ---------- */
+function makeSalt() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function hashPw(pw, salt) {
+  const data = new TextEncoder().encode(`${salt || ""}::wed-gb::${pw}`);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 /* ---------- 저장소: Firebase ---------- */
 async function makeFirebaseStore() {
   const [{ initializeApp }, fs] = await Promise.all([
@@ -62,6 +74,21 @@ async function makeFirebaseStore() {
         ...payload,
         created_at: fs.serverTimestamp(),
         updated_at: fs.serverTimestamp(),
+      });
+    },
+    /* 전달사항에 남긴 축하 글을 방명록에도 올린다.
+       ★원장 저장과 분리한다. 방명록 쓰기가 실패해도 참석 응답은 성공이어야 한다.
+       삭제 비밀번호는 연락처 뒤 4자리로 둬서 본인이 방명록에서 지울 수 있게 한다. */
+    async addGuestbook({ name, message, pwPlain }) {
+      const salt = makeSalt();
+      const pw = await hashPw(pwPlain, salt);
+      await fs.addDoc(fs.collection(db, "guestbook"), {
+        name,
+        message,
+        pw,
+        salt,
+        image: null,
+        createdAt: fs.serverTimestamp(),
       });
     },
   };
@@ -105,6 +132,8 @@ const minusBtn = document.querySelector("[data-rsvp-minus]");
 const plusBtn = document.querySelector("[data-rsvp-plus]");
 const errorEl = document.querySelector("[data-rsvp-error]");
 const submitBtn = document.querySelector("[data-rsvp-submit]");
+const gbOptIn = document.querySelector("[data-rsvp-guestbook]");
+const gbOptInRow = document.querySelector("[data-rsvp-gb-row]");
 const modeNote = document.querySelector("[data-rsvp-mode]");
 const successEl = document.querySelector("[data-rsvp-success]");
 const successTitle = document.querySelector("[data-rsvp-success-title]");
@@ -127,6 +156,7 @@ function applyStatus() {
   if (commonBox) commonBox.hidden = !status;
   if (attendingBox) attendingBox.hidden = status !== "attending";
   if (decliningBox) decliningBox.hidden = status !== "not_attending";
+  if (gbOptInRow) gbOptInRow.hidden = !status;
   if (submitBtn) {
     submitBtn.textContent = status === "not_attending" ? "응답 전달하기" : "참석 의사 전달하기";
   }
@@ -272,6 +302,7 @@ function resetForm() {
   if (form) form.reset();
   attendeeNames = [""];
   attendeeKids = [false];
+  if (gbOptIn) gbOptIn.checked = true;
   lastAutoName = "";
   if (partyInput) partyInput.value = "1";
   clearError();
@@ -349,6 +380,27 @@ async function handleSubmit(event) {
   try {
     // §13: 오프라인/차단 시 Firestore는 즉시 실패하지 않고 대기할 수 있으므로 타임아웃으로 실패 처리.
     await withTimeout(activeStore.add(payload), SDK_TIMEOUT, "submit");
+
+    /* 축하 글은 방명록에도 남긴다. 비워 두거나 "-"만 적은 경우는 남기지 않는다.
+       실패하더라도 참석 응답은 이미 저장됐으므로 성공으로 처리한다. */
+    const wantsGuestbook = !gbOptIn || gbOptIn.checked;
+    const gbText = message.replace(/^[-\s]+$/, "").trim();
+    if (gbText && wantsGuestbook && typeof activeStore.addGuestbook === "function") {
+      try {
+        await withTimeout(
+          activeStore.addGuestbook({
+            name: respondentName,
+            message: gbText,
+            pwPlain: phoneDigits.slice(-4),
+          }),
+          SDK_TIMEOUT,
+          "guestbook",
+        );
+      } catch (gbErr) {
+        console.error("guestbook mirror failed", gbErr);
+      }
+    }
+
     showSuccess(status);
   } catch (err) {
     console.error(err);

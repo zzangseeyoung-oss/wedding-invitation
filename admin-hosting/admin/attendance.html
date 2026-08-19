@@ -105,6 +105,8 @@
       .badge.old { background: #eee; color: var(--muted); }
       .badge.dup { background: #f7efe3; color: var(--warn); }
       .muted-note { color: var(--muted); font-size: 0.78rem; }
+      .gb-btn { margin-top: 5px; border: 1px solid #cfd9e6; background: #f5f8fc; color: #2f5d8a; border-radius: 7px; padding: 4px 9px; font: 600 0.74rem/1 var(--sans); cursor: pointer; white-space: nowrap; }
+      .gb-btn:hover { background: #e9f0f8; }
       .kidmark { display: inline-block; padding: 0 6px; border-radius: 20px; background: #eaf1f7; color: #2f5d8a; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
       .kidline { margin-top: 10px; color: var(--muted); font-size: 0.8rem; }
       .kidline b { color: var(--blue); }
@@ -386,8 +388,17 @@
       const stateBadges = (r) => (r.isLatest ? '<span class="badge latest">최신</span>' : '<span class="badge old">이전</span>') + (r.dupGroupSize > 1 ? ' <span class="badge dup">중복 가능</span>' : "");
       function phoneCell(r) { const full = fmtPhone(r.phone); const digits = normPhone(r.phone);
         return `<span class="phone-cell"><a href="tel:${esc(digits)}">${esc(full)}</a> <button class="copy" data-copy-phone="${esc(digits)}">복사</button></span>`; }
-      function msgCell(r) { if (!r.message) return "-"; if (r.message.length <= 24) return `<span>${esc(r.message)}</span>`;
-        return `<span class="msg"><span class="short">${esc(r.message.slice(0,24))}… <button class="link" data-toggle-msg>더보기</button></span><span class="full">${esc(r.message)}</span></span>`; }
+      /* 전달사항에 남긴 축하 글을 공개 방명록으로 올린다.
+         빈 값이나 "-"만 적힌 경우는 올릴 것이 없으므로 버튼도 두지 않는다. */
+      const gbText = (r) => String(r.message || "").replace(/^[-\s]+$/, "").trim();
+      function msgCell(r) {
+        const t = gbText(r);
+        if (!t) return "-";
+        const body = t.length <= 24
+          ? `<span>${esc(t)}</span>`
+          : `<span class="msg"><span class="short">${esc(t.slice(0,24))}… <button class="link" data-toggle-msg>더보기</button></span><span class="full">${esc(t)}</span></span>`;
+        return `${body}<div><button class="gb-btn" data-gb="${esc(r.id)}">방명록에 올리기</button></div>`;
+      }
 
       const partyCell = (r) => {
         const k = (r.kids || []).length;
@@ -423,6 +434,46 @@
           <div class="rc-line"><span class="rc-k">전달</span> ${r.message ? esc(r.message) : "-"}</div>
           <div class="rc-line"><span class="rc-k">일시</span> ${esc(fmtDate(r.created))}</div>
           <div class="rc-line" style="margin-top:8px"><button class="del-btn" data-del="${esc(r.id)}" data-del-name="${esc(r.name)}">삭제</button></div></div>`).join("");
+      }
+
+      /* ---------- 전달사항 → 방명록 ---------- */
+      function makeSalt() {
+        const b = new Uint8Array(16); crypto.getRandomValues(b);
+        return [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
+      }
+      async function hashPw(pw, salt) {
+        const data = new TextEncoder().encode(`${salt || ""}::wed-gb::${pw}`);
+        const buf = await crypto.subtle.digest("SHA-256", data);
+        return [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, "0")).join("");
+      }
+      async function pushToGuestbook(id) {
+        const r = rows.find((x) => x.id === id);
+        if (!r) return;
+        const text = gbText(r);
+        if (!text) return toast("올릴 축하 글이 없습니다.");
+        if (!confirm(`방명록에 올릴까요?
+
+${r.name}
+${text}
+
+공개 방명록에 그대로 보입니다.`)) return;
+        try {
+          // 같은 이름·같은 글이 이미 있으면 다시 올리지 않는다
+          const snap = await fs.getDocs(fs.query(fs.collection(db, "guestbook"), fs.where("name", "==", r.name)));
+          if (snap.docs.some((d) => String((d.data() || {}).message || "").trim() === text)) {
+            return toast("이미 방명록에 있습니다.");
+          }
+          const salt = makeSalt();
+          // 삭제 비밀번호 = 작성자 연락처 뒤 4자리(본인이 방명록에서 지울 수 있게)
+          const pw = await hashPw(normPhone(r.phone).slice(-4), salt);
+          await fs.addDoc(fs.collection(db, "guestbook"), {
+            name: r.name, message: text, pw, salt, image: null, createdAt: fs.serverTimestamp(),
+          });
+          toast("방명록에 올렸습니다.");
+        } catch (e) {
+          console.error(e);
+          toast("방명록에 올리지 못했습니다.");
+        }
       }
 
       let csvUrl = null;
@@ -480,6 +531,7 @@
       document.addEventListener("click", async (e) => {
         const tm = e.target.closest("[data-toggle-msg]"); if (tm) { tm.closest(".msg").classList.add("open"); return; }
         const cp = e.target.closest("[data-copy-phone]"); if (cp) { try { await navigator.clipboard.writeText(cp.dataset.copyPhone); cp.textContent = "복사됨"; setTimeout(() => (cp.textContent = "복사"), 1200); } catch {} return; }
+        const gb = e.target.closest("[data-gb]"); if (gb) { pushToGuestbook(gb.dataset.gb); return; }
         const dl = e.target.closest("[data-del]"); if (dl) { doDelete(dl.dataset.del, dl.dataset.delName); return; }
       });
 

@@ -553,14 +553,14 @@
                 <div class="rsvp-attendees" data-rsvp-attendees></div>
               </div>
               <label class="rsvp-field">
-                <span class="field-label">전달사항 <em>선택</em></span>
-                <textarea name="message_attending" maxlength="200" rows="3" placeholder="전달하실 말씀이 있으면 적어주세요"></textarea>
+                <span class="field-label">축하 한마디 <em>선택</em></span>
+                <textarea name="message_attending" maxlength="200" rows="3" placeholder="축하 인사나 전달하실 말씀을 적어주세요"></textarea>
               </label>
             </div>
 
             <div class="rsvp-declining" data-rsvp-declining hidden>
               <label class="rsvp-field">
-                <span class="field-label">전달사항 <em>선택</em></span>
+                <span class="field-label">축하 한마디 <em>선택</em></span>
                 <textarea name="message_declining" maxlength="200" rows="3" placeholder="축하 인사나 전달하실 말씀을 적어주세요"></textarea>
               </label>
             </div>
@@ -573,6 +573,11 @@
               <summary>수집 항목 자세히 보기</summary>
               <p>참석 여부 확인 및 예식 준비를 위해 성함, 연락처, 참석 인원 정보를 수집합니다. 수집된 정보는 예식 준비 목적 외에는 사용되지 않으며, 청첩장 이용 종료 후 안전하게 관리됩니다.</p>
             </details>
+
+            <label class="rsvp-gb-optin" data-rsvp-gb-row hidden>
+              <input type="checkbox" data-rsvp-guestbook checked />
+              <span>남겨주신 축하 한마디를 <b>방명록</b>에도 올릴게요<em>알리고 싶지 않은 내용이면 체크를 풀어주세요</em></span>
+            </label>
 
             <p class="rsvp-error" data-rsvp-error hidden></p>
             <button type="submit" class="rsvp-submit" data-rsvp-submit>참석 의사 전달하기</button>

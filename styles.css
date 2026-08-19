@@ -2665,3 +2665,39 @@ body.rsvp-is-open {
     color: inherit;
   }
 }
+
+/* 축하 한마디를 방명록에도 올릴지 선택 */
+.rsvp-gb-optin {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 2px 0 4px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 250, 240, 0.75);
+  cursor: pointer;
+}
+.rsvp-gb-optin input {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin: 1px 0 0;
+  accent-color: var(--green-dark);
+}
+.rsvp-gb-optin span {
+  color: var(--text);
+  font: 400 0.84rem/1.5 var(--sans);
+  word-break: keep-all;
+}
+.rsvp-gb-optin b {
+  color: var(--green-dark);
+  font-weight: 600;
+}
+.rsvp-gb-optin em {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font: 400 0.76rem/1.45 var(--sans);
+  font-style: normal;
+}
