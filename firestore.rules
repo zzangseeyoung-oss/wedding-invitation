@@ -38,7 +38,17 @@ service cloud.firestore {
           request.resource.data.message.size() > 0
           || request.resource.data.image != null
         )
-        && request.resource.data.createdAt == request.time;
+        && (
+          // 일반 방문자: 지금 시각으로만 작성 가능(과거 날짜 위조 방지)
+          request.resource.data.createdAt == request.time
+          // 관리자(신랑·신부): 참석 응답의 축하 글을 방명록으로 옮길 때
+          // 원래 응답 시각을 그대로 살려야 하므로 과거 시각을 허용한다.
+          || (
+            isRsvpAdmin()
+            && request.resource.data.createdAt is timestamp
+            && request.resource.data.createdAt <= request.time
+          )
+        );
 
       allow update: if false;
       allow delete: if true;

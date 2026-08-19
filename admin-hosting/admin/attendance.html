@@ -447,19 +447,25 @@
         const buf = await crypto.subtle.digest("SHA-256", data);
         return [...new Uint8Array(buf)].map((x) => x.toString(16).padStart(2, "0")).join("");
       }
+      const gbKey = (name, msg) => `${String(name || "").trim()}|~|${String(msg || "").trim()}`;
       async function loadGuestbookIndex() {
         const snap = await fs.getDocs(fs.collection(db, "guestbook"));
-        return new Set(snap.docs.map((d) => {
+        const map = new Map();
+        snap.docs.forEach((d) => {
           const x = d.data() || {};
-          return `${String(x.name || "").trim()}|~|${String(x.message || "").trim()}`;
-        }));
+          const at = x.createdAt && x.createdAt.toDate ? x.createdAt.toDate() : null;
+          map.set(gbKey(x.name, x.message), { id: d.id, at });
+        });
+        return map;
       }
-      async function addGuestbookDoc(name, text, phone) {
+      async function addGuestbookDoc(name, text, phone, when) {
         const salt = makeSalt();
         // 삭제 비밀번호 = 작성자 연락처 뒤 4자리(본인이 방명록에서 지울 수 있게)
         const pw = await hashPw(normPhone(phone).slice(-4), salt);
         await fs.addDoc(fs.collection(db, "guestbook"), {
-          name, message: text, pw, salt, image: null, createdAt: fs.serverTimestamp(),
+          name, message: text, pw, salt, image: null,
+          // 옮겨 담는 글은 '올린 시각'이 아니라 하객이 실제로 남긴 시각이어야 한다.
+          createdAt: when ? fs.Timestamp.fromDate(when) : fs.serverTimestamp(),
         });
       }
 
@@ -471,21 +477,38 @@
         let index;
         try { index = await loadGuestbookIndex(); }
         catch (e) { console.error(e); return toast("방명록을 확인하지 못했습니다."); }
-        const todo = targets.filter((r) => !index.has(`${r.name.trim()}|~|${gbText(r)}`));
-        if (!todo.length) return toast("이미 모두 방명록에 있습니다.");
-        const preview = todo.slice(0, 5).map((r) => `· ${r.name}: ${gbText(r).slice(0, 20)}`).join("\n");
-        if (!confirm(`축하 글 ${todo.length}개를 방명록에 올릴까요?
+        // 없으면 추가하고, 이미 있는데 날짜가 응답 시각과 1분 이상 다르면 고친다
+        const add = [], fix = [];
+        targets.forEach((r) => {
+          const hit = index.get(gbKey(r.name, gbText(r)));
+          if (!hit) { add.push(r); return; }
+          const want = r.created ? r.created.getTime() : null;
+          const have = hit.at ? hit.at.getTime() : null;
+          if (want && have && Math.abs(want - have) > 60000) fix.push({ r, id: hit.id });
+        });
+        if (!add.length && !fix.length) return toast("이미 모두 방명록에 있습니다.");
+        const lines = [
+          ...add.map((r) => `· 추가  ${r.name}: ${gbText(r).slice(0, 18)}`),
+          ...fix.map((f) => `· 날짜수정  ${f.r.name} → ${fmtDate(f.r.created)}`),
+        ];
+        if (!confirm(`방명록에 반영할까요?
 
-${preview}${todo.length > 5 ? "\n…" : ""}
+추가 ${add.length}개 · 날짜수정 ${fix.length}개
 
-공개 방명록에 그대로 보입니다.`)) return;
-        let ok = 0;
-        for (const r of todo) {
-          try { await addGuestbookDoc(r.name, gbText(r), r.phone); ok += 1; }
+${lines.slice(0, 6).join("\n")}${lines.length > 6 ? "\n…" : ""}`)) return;
+        let okAdd = 0, okFix = 0;
+        for (const r of add) {
+          try { await addGuestbookDoc(r.name, gbText(r), r.phone, r.created); okAdd += 1; }
           catch (e) { console.error(e); }
         }
-        const skipped = targets.length - todo.length;
-        toast(`${ok}개를 방명록에 올렸습니다.` + (skipped ? ` (이미 있던 ${skipped}개 제외)` : ""));
+        for (const f of fix) {
+          try {
+            await fs.deleteDoc(fs.doc(db, "guestbook", f.id));
+            await addGuestbookDoc(f.r.name, gbText(f.r), f.r.phone, f.r.created);
+            okFix += 1;
+          } catch (e) { console.error(e); }
+        }
+        toast(`추가 ${okAdd}개 · 날짜수정 ${okFix}개 완료`);
       }
 
       async function pushToGuestbook(id) {
@@ -501,11 +524,9 @@ ${text}
 공개 방명록에 그대로 보입니다.`)) return;
         try {
           // 같은 이름·같은 글이 이미 있으면 다시 올리지 않는다
-          const snap = await fs.getDocs(fs.query(fs.collection(db, "guestbook"), fs.where("name", "==", r.name)));
-          if (snap.docs.some((d) => String((d.data() || {}).message || "").trim() === text)) {
-            return toast("이미 방명록에 있습니다.");
-          }
-          await addGuestbookDoc(r.name, text, r.phone);
+          const index = await loadGuestbookIndex();
+          if (index.has(gbKey(r.name, text))) return toast("이미 방명록에 있습니다.");
+          await addGuestbookDoc(r.name, text, r.phone, r.created);
           toast("방명록에 올렸습니다.");
         } catch (e) {
           console.error(e);
