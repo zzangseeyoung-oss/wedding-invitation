@@ -28,10 +28,15 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Build public site (allowlist)
+        env:
+          PUBLIC_ARTIFACT_GUARD_TERMS: ${{ secrets.PUBLIC_ARTIFACT_GUARD_TERMS }}
+        run: bash scripts/build-public-site.sh
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
       - name: Deploy
         id: deployment
