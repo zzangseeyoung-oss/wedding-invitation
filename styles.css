@@ -2701,3 +2701,31 @@ body.rsvp-is-open {
   font: 400 0.76rem/1.45 var(--sans);
   font-style: normal;
 }
+
+/* Wedding gallery link (static: the gallery server itself shows whether the album is open yet) */
+.gallery-link {
+  text-align: center;
+}
+
+.gallery-link-note {
+  position: relative;
+  margin: 16px 0 0;
+  color: var(--ink);
+  font: 400 0.98rem/1.8 var(--sans);
+}
+
+.gallery-link-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 280px);
+  min-height: 52px;
+  margin: 24px auto 0;
+  border: 1px solid var(--green);
+  border-radius: 4px;
+  background: var(--green);
+  color: #fff;
+  font: 600 1rem/1.3 var(--sans);
+  text-decoration: none;
+}
