@@ -1,21 +1,21 @@
 /*
- * AI 대화 기능 제거 상태.
+ * 대화 기능 제거 상태.
  *
  * 청첩장 본문·배경음악·지도·계좌·방명록은 그대로 유지하고,
- * 기존 AI 진입 카드와 채팅 오버레이만 DOM에서 제거한다.
- * 네트워크 요청이나 로컬 AI 백엔드 호출은 수행하지 않는다.
+ * 기존 대화 진입 카드와 채팅 오버레이만 DOM에서 제거한다.
+ * 네트워크 요청이나 로컬 대화 백엔드 호출은 수행하지 않는다.
  */
 
-const AI_STORAGE_KEY_PATTERNS = [
+const CHAT_STORAGE_KEY_PATTERNS = [
   /^couple_story_chat_/,
   /^wedding_dael(?:_rael)?_chat_/,
 ];
 
-function removeAiStorage() {
+function removeChatStorage() {
   try {
     for (let index = localStorage.length - 1; index >= 0; index -= 1) {
       const key = localStorage.key(index);
-      if (key && AI_STORAGE_KEY_PATTERNS.some((pattern) => pattern.test(key))) {
+      if (key && CHAT_STORAGE_KEY_PATTERNS.some((pattern) => pattern.test(key))) {
         localStorage.removeItem(key);
       }
     }
@@ -33,5 +33,5 @@ function removeAiUi() {
   document.documentElement.classList.remove('story-ai-open');
 }
 
-removeAiStorage();
+removeChatStorage();
 removeAiUi();
