@@ -174,6 +174,9 @@ if (countdown) {
   let isOpen = false;
   let returnY = 0;
   let inerted = [];
+  let fallback = null;
+  let readyTimer = null;
+  const galleryOrigin = new URL(link.href).origin;
 
   function frameSrc() {
     const u = new URL(link.href);
@@ -216,7 +219,15 @@ if (countdown) {
       audio.addEventListener("pause", reflectMusic);
       bar.append(musicBtn);
     }
-    overlay.append(bar);
+    // 갤러리가 열리지 않을 때(연결 문제 등) 원래 주소로 바로 가는 길
+    fallback = document.createElement("p");
+    fallback.className = "gallery-overlay-fallback";
+    fallback.hidden = true;
+    const direct = document.createElement("a");
+    direct.href = link.href;
+    direct.textContent = "갤러리로 바로 가기";
+    fallback.append("갤러리가 열리지 않나요? ", direct);
+    overlay.append(bar, fallback);
     overlay.addEventListener("keydown", (e) => {
       if (e.key === "Escape") { e.preventDefault(); requestClose(); }
     });
@@ -233,6 +244,9 @@ if (countdown) {
     frame.title = "웨딩 갤러리";
     frame.src = frameSrc();
     overlay.append(frame);
+    fallback.hidden = true;
+    clearTimeout(readyTimer);
+    readyTimer = setTimeout(() => { if (isOpen) fallback.hidden = false; }, 8000);
     inerted = [];
     for (const el of document.body.children) {
       if (el !== overlay && !el.inert) { el.inert = true; inerted.push(el); }
@@ -247,6 +261,7 @@ if (countdown) {
     if (!isOpen) return;
     isOpen = false;
     overlay.hidden = true;
+    clearTimeout(readyTimer);
     if (frame) { frame.remove(); frame = null; }
     inerted.forEach((el) => { el.inert = false; });
     inerted = [];
@@ -275,6 +290,13 @@ if (countdown) {
     if (isOpen) return;
     history.pushState({ wgGallery: 1 }, "");
     openOverlay();
+  });
+
+  window.addEventListener("message", (e) => {
+    if (frame && e.source === frame.contentWindow && e.origin === galleryOrigin && e.data && e.data.wg === "gallery-ready") {
+      clearTimeout(readyTimer);
+      fallback.hidden = true;
+    }
   });
 
   window.addEventListener("popstate", () => {
