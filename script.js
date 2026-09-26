@@ -158,3 +158,153 @@ if (countdown) {
   window.addEventListener("scroll", sweep, { passive: true });
   sweep();
 })();
+
+/* ---------- 웨딩 갤러리: 청첩장 위 전체 화면으로 열기 ----------
+   페이지를 떠나지 않으므로 배경음악이 끊기지 않는다. 갤러리는 ?embedded=1 로 열려 자기 음악을 쓰지 않는다.
+   히스토리 1개를 쌓고 휴대폰 뒤로가기 = 닫기. 스크립트가 없거나 실패하면 링크가 그대로 갤러리로 이동한다. */
+(function initGalleryOverlay() {
+  const link = document.querySelector(".gallery-link-button");
+  if (!link || typeof history.pushState !== "function" || typeof URL !== "function") return;
+  const audio = document.getElementById("wedding-bgm");
+  const pageBgmBtn = document.querySelector("[data-bgm-toggle]");
+  let overlay = null;
+  let frame = null;
+  let musicBtn = null;
+  let closeBtn = null;
+  let isOpen = false;
+  let returnY = 0;
+  let inerted = [];
+  let fallback = null;
+  let readyTimer = null;
+  const galleryOrigin = new URL(link.href).origin;
+
+  function frameSrc() {
+    const u = new URL(link.href);
+    u.searchParams.set("embedded", "1");
+    return u.href;
+  }
+
+  function reflectMusic() {
+    if (!musicBtn || !audio) return;
+    const on = !audio.paused;
+    musicBtn.classList.toggle("playing", on);
+    musicBtn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+
+  function build() {
+    overlay = document.createElement("div");
+    overlay.className = "gallery-overlay";
+    overlay.hidden = true;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", "웨딩 갤러리");
+    const bar = document.createElement("div");
+    bar.className = "gallery-overlay-bar";
+    closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "gallery-overlay-close";
+    closeBtn.textContent = "닫기";
+    closeBtn.addEventListener("click", requestClose);
+    const title = document.createElement("span");
+    title.className = "gallery-overlay-title";
+    title.textContent = "웨딩 갤러리";
+    bar.append(closeBtn, title);
+    if (audio && pageBgmBtn) {
+      // 청첩장 음악 버튼과 같은 동작(같은 음악, 일시정지 기억)을 겹쳐진 화면에서도 쓸 수 있게 한다.
+      musicBtn = pageBgmBtn.cloneNode(true);
+      musicBtn.removeAttribute("data-bgm-toggle");
+      musicBtn.className = "gallery-overlay-music";
+      musicBtn.addEventListener("click", () => pageBgmBtn.click());
+      audio.addEventListener("play", reflectMusic);
+      audio.addEventListener("pause", reflectMusic);
+      bar.append(musicBtn);
+    }
+    // 갤러리가 열리지 않을 때(연결 문제 등) 원래 주소로 바로 가는 길
+    fallback = document.createElement("p");
+    fallback.className = "gallery-overlay-fallback";
+    fallback.hidden = true;
+    const direct = document.createElement("a");
+    direct.href = link.href;
+    direct.textContent = "갤러리로 바로 가기";
+    fallback.append("갤러리가 열리지 않나요? ", direct);
+    overlay.append(bar, fallback);
+    overlay.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { e.preventDefault(); requestClose(); }
+    });
+    document.body.append(overlay);
+  }
+
+  function openOverlay() {
+    if (isOpen) return;
+    if (!overlay) build();
+    isOpen = true;
+    returnY = window.scrollY;
+    frame = document.createElement("iframe");
+    frame.className = "gallery-overlay-frame";
+    frame.title = "웨딩 갤러리";
+    frame.src = frameSrc();
+    overlay.append(frame);
+    fallback.hidden = true;
+    clearTimeout(readyTimer);
+    readyTimer = setTimeout(() => { if (isOpen) fallback.hidden = false; }, 8000);
+    inerted = [];
+    for (const el of document.body.children) {
+      if (el !== overlay && !el.inert) { el.inert = true; inerted.push(el); }
+    }
+    document.documentElement.classList.add("gallery-overlay-open");
+    overlay.hidden = false;
+    reflectMusic();
+    closeBtn.focus({ preventScroll: true });
+  }
+
+  function closeOverlay() {
+    if (!isOpen) return;
+    isOpen = false;
+    overlay.hidden = true;
+    clearTimeout(readyTimer);
+    if (frame) { frame.remove(); frame = null; }
+    inerted.forEach((el) => { el.inert = false; });
+    inerted = [];
+    document.documentElement.classList.remove("gallery-overlay-open");
+    window.scrollTo({ top: returnY, behavior: "instant" });
+    link.focus({ preventScroll: true });
+  }
+
+  // 닫기 = 뒤로가기. 갤러리 안에서 사진 보기·올리기 화면이 열려 있으면 그 기록이 먼저 닫히므로 몇 번까지 이어서 뒤로 간다.
+  // 갤러리가 확인 창(올리는 중·고른 사진 있음)을 띄우면 더 누르지 않고 그 선택에 맡긴다.
+  function requestClose() {
+    if (!isOpen) return;
+    let tries = 0;
+    const step = () => {
+      if (!isOpen || tries >= 3) return;
+      tries += 1;
+      history.back();
+      setTimeout(step, 450);
+    };
+    step();
+  }
+
+  link.addEventListener("click", (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (isOpen) return;
+    history.pushState({ wgGallery: 1 }, "");
+    openOverlay();
+  });
+
+  window.addEventListener("message", (e) => {
+    if (frame && e.source === frame.contentWindow && e.origin === galleryOrigin && e.data && e.data.wg === "gallery-ready") {
+      clearTimeout(readyTimer);
+      fallback.hidden = true;
+    }
+  });
+
+  window.addEventListener("popstate", () => {
+    const here = history.state && history.state.wgGallery;
+    if (isOpen && !here) closeOverlay();
+    else if (!isOpen && here) openOverlay(); // 앞으로 가기로 다시 온 경우
+  });
+
+  // 새로고침 뒤 남은 갤러리 기록은 평범한 기록으로 바꾼다(다시 열려 있는 척하지 않음).
+  if (history.state && history.state.wgGallery) history.replaceState(null, "");
+})();
