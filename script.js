@@ -66,6 +66,10 @@ if (countdown) {
   }
 }
 
+/* 예식 시간 무음 잠금: 청첩장 안에서 연 갤러리 슬라이드쇼가 착석 안내(12:25)·본식(12:30) 단계라고 알리는 동안
+   청첩장 음악은 멈추고, 누르기·스크롤·자동재생·음악 버튼 어떤 것으로도 다시 켜지지 않는다. 슬라이드쇼 밖의 음악 동작은 그대로. */
+const WG_QUIET = { on: false };
+
 /* ---------- 배경음악(자동재생 시도 + 반복 + 토글) ---------- */
 (function initBgm() {
   const audio = document.getElementById("wedding-bgm");
@@ -73,6 +77,7 @@ if (countdown) {
   if (!audio || !btn) return;
   audio.volume = 0.5;
   let userPaused = false;
+  audio.addEventListener("play", () => { if (WG_QUIET.on) audio.pause(); });   // 어떤 경로로 켜져도 무음 시간에는 바로 끈다
 
   function reflect() {
     const on = !audio.paused;
@@ -81,11 +86,11 @@ if (countdown) {
   }
 
   // 브라우저 자동재생 정책상 소리 있는 자동재생은 첫 사용자 상호작용이 필요할 수 있다.
-  audio.play().then(reflect).catch(() => {});
+  if (!WG_QUIET.on) audio.play().then(reflect).catch(() => {});
 
   const kick = (e) => {
     if (btn.contains(e.target)) return; // 토글 버튼 클릭은 자체 핸들러가 처리
-    if (userPaused) return;
+    if (userPaused || WG_QUIET.on) return;
     audio.play().then(() => {
       reflect();
       if (!audio.paused) {
@@ -101,6 +106,7 @@ if (countdown) {
 
   btn.addEventListener("click", (e) => {
     e.stopPropagation();
+    if (WG_QUIET.on) { showToast("예식이 진행되는 동안에는 음악이 꺼져 있어요."); return; }
     if (audio.paused) {
       userPaused = false;
       audio.play().then(reflect).catch(() => {});
@@ -242,6 +248,8 @@ if (countdown) {
     frame = document.createElement("iframe");
     frame.className = "gallery-overlay-frame";
     frame.title = "웨딩 갤러리";
+    frame.allow = "fullscreen; autoplay";   // 갤러리 슬라이드쇼(식전영상)가 휴대폰 화면 전체를 쓸 수 있게
+    frame.allowFullscreen = true;
     frame.src = frameSrc();
     overlay.append(frame);
     fallback.hidden = true;
@@ -261,6 +269,7 @@ if (countdown) {
     if (!isOpen) return;
     isOpen = false;
     overlay.hidden = true;
+    setSlideshow(false, "");
     clearTimeout(readyTimer);
     if (frame) { frame.remove(); frame = null; }
     inerted.forEach((el) => { el.inert = false; });
@@ -292,10 +301,26 @@ if (countdown) {
     openOverlay();
   });
 
+  // 갤러리 슬라이드쇼가 열려 있는 동안: 머리 막대를 숨겨 iframe이 화면 전체를 쓰게 하고(닫으면 그대로 복구),
+  // 착석 안내·본식 단계에는 청첩장 음악을 멈추고 잠근다. 슬라이드쇼가 닫히면 잠금만 풀린다(음악을 다시 켜지는 않는다).
+  function setSlideshow(on, phase) {
+    if (!overlay) return;
+    overlay.classList.toggle("is-slideshow", !!on);
+    const quiet = !!on && (phase === "notice" || phase === "ceremony");
+    WG_QUIET.on = quiet;
+    if (quiet && audio && !audio.paused) audio.pause();
+  }
+
   window.addEventListener("message", (e) => {
-    if (frame && e.source === frame.contentWindow && e.origin === galleryOrigin && e.data && e.data.wg === "gallery-ready") {
+    // 보낸 창이 지금 열린 갤러리 iframe이고, 주소가 갤러리 주소일 때만 믿는다
+    if (!frame || e.source !== frame.contentWindow || e.origin !== galleryOrigin || !e.data || typeof e.data !== "object") return;
+    if (e.data.wg === "gallery-ready") {
       clearTimeout(readyTimer);
       fallback.hidden = true;
+    } else if (e.data.wg === "slideshow" && isOpen) {
+      const phases = ["pre", "notice", "ceremony", "gallery", ""];
+      const phase = phases.includes(e.data.phase) ? e.data.phase : "";
+      setSlideshow(e.data.state === "open", phase);
     }
   });
 
